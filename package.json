@@ -12,9 +12,11 @@
   "dependencies": {
     "leaflet": "^1.9.4",
     "lucide": "^1.20.0",
+    "lucide-react": "^1.20.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.6",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -3,7 +3,13 @@
 // para imitar la latencia de una red real. Así puedes mostrar estados de carga
 // (spinners, skeletons) — refuerza el RNF7 (retroalimentación) de tu C3.
 
-import { grabaciones, niveles_permiso } from "./data";
+import {
+  grabaciones,
+  niveles_permiso,
+  categorias,
+  colecciones,
+  proyectos,
+} from "./data";
 
 const latencia = (ms = 600) => new Promise((r) => setTimeout(r, ms));
 
@@ -14,7 +20,10 @@ export async function getGrabaciones(filtros = {}) {
 
   if (filtros.region) resultado = resultado.filter((g) => g.region === filtros.region);
   if (filtros.ecosistema) resultado = resultado.filter((g) => g.ecosistema === filtros.ecosistema);
-  if (filtros.especie) resultado = resultado.filter((g) => g.especie.includes(filtros.especie));
+  if (filtros.especie) {
+    const q = filtros.especie.toLowerCase();
+    resultado = resultado.filter((g) => g.especie.toLowerCase().includes(q));
+  }
   if (filtros.busqueda) {
     const q = filtros.busqueda.toLowerCase();
     resultado = resultado.filter(
@@ -35,7 +44,9 @@ export async function getGrabacion(id) {
 // POST simular subida de archivo (no guarda nada real, solo confirma)
 export async function subirGrabacion(datos) {
   await latencia(1200); // subir tarda más
-  // Validación de ejemplo: fecha obligatoria
+  if (!datos.titulo) {
+    throw new Error("Falta el título de la grabación. Complétalo para poder publicar.");
+  }
   if (!datos.fecha_captura) {
     throw new Error("Falta la fecha de captura. Complétala para poder publicar.");
   }
@@ -46,4 +57,22 @@ export async function subirGrabacion(datos) {
 export async function getNivelesPermiso() {
   await latencia(200);
   return niveles_permiso;
+}
+
+// GET datos del home
+export async function getHome() {
+  await latencia(300);
+  return { categorias, colecciones };
+}
+
+// GET proyectos (gestión de permisos)
+export async function getProyectos() {
+  await latencia(400);
+  return [...proyectos];
+}
+
+// PUT cambiar permiso de un proyecto (simulado)
+export async function guardarPermisoProyecto(idProyecto, nuevoPermiso) {
+  await latencia(700);
+  return { ok: true, mensaje: "Cambios guardados correctamente." };
 }

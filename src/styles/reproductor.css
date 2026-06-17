@@ -1,0 +1,85 @@
+/* src/styles/reproductor.css */
+.reproductor {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.reproductor-completo {
+  background: #fff;
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radio);
+  padding: 18px 20px;
+}
+
+.repro-play {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--azul);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.repro-play:hover {
+  background: var(--azul-oscuro);
+}
+
+.repro-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.repro-barra-progreso {
+  height: 5px;
+  background: var(--borde-suave);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.repro-barra-relleno {
+  height: 100%;
+  background: var(--texto-suave);
+  transition: width 0.2s linear;
+}
+
+.repro-tiempos {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+  margin: 6px 0 10px;
+}
+
+.repro-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 48px;
+}
+.reproductor-compacto .repro-waveform {
+  height: 38px;
+}
+
+.repro-barra {
+  flex: 1;
+  min-width: 2px;
+  background: var(--borde);
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+.repro-barra.activa {
+  background: var(--azul);
+}
+.reproductor-compacto .repro-barra.activa {
+  background: var(--azul);
+}
+
+.repro-volumen {
+  flex-shrink: 0;
+  color: var(--azul);
+  display: flex;
+  align-items: center;
+}

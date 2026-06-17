@@ -1,0 +1,55 @@
+/* src/styles/header.css */
+.header {
+  background: #fff;
+  border-bottom: 1px solid var(--borde-suave);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: 24px;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.nav-global {
+  display: flex;
+  gap: 22px;
+  font-size: 0.95rem;
+}
+.nav-global a {
+  color: var(--texto);
+  padding: 4px 0;
+}
+.nav-global a.active {
+  color: var(--azul);
+  font-weight: 600;
+}
+.nav-global a:hover {
+  color: var(--azul);
+}
+
+.header-acciones {
+  display: flex;
+  gap: 10px;
+}
+
+/* Responsive: en móvil ocultamos la nav central para no apretar (RNF2) */
+@media (max-width: 720px) {
+  .nav-global {
+    display: none;
+  }
+  .header-acciones .btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
