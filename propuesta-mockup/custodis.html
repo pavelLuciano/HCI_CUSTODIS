@@ -117,9 +117,10 @@
   .play-btn{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;border:none;font-size:16px}
   .play-btn:hover{background:var(--primary-hover);transform:scale(1.05)}
   .waveform{flex:1;height:48px;display:flex;align-items:center;gap:2px;cursor:pointer;position:relative}
-  .wave-bar{width:3px;background:var(--primary);border-radius:2px;opacity:.4;transition:.15s}
+  .wave-bar{width:3px;background:var(--primary);border-radius:2px;opacity:.4;transition:opacity .15s}
   .waveform:hover .wave-bar{opacity:.6}
   .waveform.playing .wave-bar{animation:wavePulse 1s ease infinite alternate}
+  .wave-bar.active{opacity:1;background:var(--primary-hover)}
   @keyframes wavePulse{0%{opacity:.3}100%{opacity:1}}
 
   .detail-layout{max-width:960px;margin:0 auto;padding:40px 24px}
@@ -135,9 +136,9 @@
   .detail-waveform .wave-bar{width:4px}
   .player-controls{display:flex;align-items:center;gap:16px}
   .player-controls .play-btn{width:52px;height:52px}
-  .player-time{font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .player-time{font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;min-width:40px}
   .player-progress{flex:1;height:6px;background:var(--border-light);border-radius:3px;cursor:pointer;position:relative}
-  .player-progress-fill{height:100%;background:var(--primary);border-radius:3px;width:0%;transition:.1s}
+  .player-progress-fill{height:100%;background:var(--primary);border-radius:3px;width:0%;transition:width .1s linear}
 
   .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
   .meta-section h4{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
@@ -275,6 +276,9 @@
 </head>
 <body>
 
+<!-- AUDIO GLOBAL DE PRUEBA -->
+<audio id="globalAudio" src="audio_humedal_test.mp3" preload="auto"></audio>
+
 <header class="header">
   <div class="header-inner">
     <div class="logo" onclick="navigate('home')">
@@ -292,13 +296,13 @@
       <button class="btn btn-outline" id="btnLogin" onclick="openModal('login')">Iniciar sesión</button>
       <button class="btn btn-primary" id="btnRegister" onclick="openModal('register')">Registrarse</button>
       <div class="user-menu" id="userMenu" style="display:none">
-        <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">DV</div>
+        <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">AD</div>
         <div class="user-dropdown" id="userDropdown">
           <div class="user-dropdown-header">
-            <strong id="userName">Dr. Valenzuela</strong>
-            <span id="userEmail">valenzuela@uach.cl</span>
+            <strong id="userName">Admin</strong>
+            <span id="userEmail">admin@custodis.cl</span>
           </div>
-          <a onclick="navigate('upload');closeUserMenu()"> Cargar archivos</a>
+          <a onclick="navigate('upload');closeUserMenu()">📤 Cargar archivos</a>
           <a onclick="navigate('permissions');closeUserMenu()">🔐 Gestión de permisos</a>
           <a onclick="navigate('activity');closeUserMenu()">📊 Actividad</a>
           <div class="divider"></div>
@@ -336,7 +340,7 @@
     <p>Accede a tu cuenta para descargar archivos y gestionar proyectos.</p>
     <div class="form-group">
       <label>Correo electrónico</label>
-      <input type="email" id="loginEmail" placeholder="tu@correo.cl" value="valenzuela@uach.cl">
+      <input type="email" id="loginEmail" placeholder="tu@correo.cl" value="admin@custodis.cl">
     </div>
     <div class="form-group">
       <label>Contraseña</label>
@@ -523,7 +527,7 @@
               <h4>Ubicación geográfica</h4>
               <div class="map-container" style="background:linear-gradient(135deg,#c8e6c9 0%,#a5d6a7 100%);display:flex;align-items:center;justify-content:center">
                 <div style="text-align:center;color:#2e5f8f">
-                  <div style="font-size:48px;margin-bottom:8px">️</div>
+                  <div style="font-size:48px;margin-bottom:8px">📍</div>
                   <div style="font-size:14px;font-weight:600">Humedal Carlos Anwandter</div>
                   <div style="font-size:12px">Valdivia, Los Ríos</div>
                 </div>
@@ -657,7 +661,7 @@
   <!-- PERMISSIONS -->
   <div class="view" id="view-permissions">
     <div class="admin-banner">
-      <h1> Gestión de permisos</h1>
+      <h1>🔐 Gestión de permisos</h1>
       <p>Controla quién puede escuchar y descargar tus proyectos. Los cambios se aplican inmediatamente.</p>
     </div>
     <div class="perm-layout">
@@ -837,18 +841,97 @@ const permProjects = [
   {id:4,name:'Anfibios del Sur',date:'20 de Mar del 2025',files:12,level:'admin',desc:'Solo el administrador puede acceder y gestionar los archivos.'},
 ];
 
-let detailPlaying = false;
-let detailProgress = 0;
+// AUDIO GLOBAL DE PRUEBA
+const testAudio = document.getElementById('globalAudio');
+let currentActiveCard = null; // id de la card que está reproduciendo
 let detailInterval = null;
 let uploadedFiles = [];
 let isLoggedIn = false;
 
+// Sincronizar waveforms con el audio real
+testAudio.addEventListener('timeupdate', () => {
+  if (!testAudio.duration) return;
+  const progress = (testAudio.currentTime / testAudio.duration) * 100;
+
+  // Actualizar card activa
+  if (currentActiveCard) {
+    const waveform = document.getElementById('wf_' + currentActiveCard);
+    if (waveform) {
+      const bars = waveform.querySelectorAll('.wave-bar');
+      const activeIndex = Math.floor((progress / 100) * bars.length);
+      bars.forEach((bar, idx) => {
+        if (idx <= activeIndex) {
+          bar.classList.add('active');
+          bar.style.opacity = '1';
+        } else {
+          bar.classList.remove('active');
+        }
+      });
+    }
+    // Actualizar tiempo
+    const btn = document.getElementById('playBtn' + currentActiveCard);
+    if (btn) {
+      btn.textContent = '';
+    }
+  }
+
+  // Actualizar detalle si está en esa vista
+  if (document.getElementById('view-detail').classList.contains('active')) {
+    document.getElementById('detailProgressFill').style.width = progress + '%';
+    const curSec = Math.floor(testAudio.currentTime);
+    document.getElementById('detailTimeCurrent').textContent = Math.floor(curSec/60) + ':' + String(curSec%60).padStart(2,'0');
+    updateDetailWaveformBars(progress);
+  }
+});
+
+testAudio.addEventListener('play', () => {
+  if (currentActiveCard) {
+    const waveform = document.getElementById('wf_' + currentActiveCard);
+    if (waveform) waveform.classList.add('playing');
+  }
+});
+
+testAudio.addEventListener('pause', () => {
+  if (currentActiveCard) {
+    const waveform = document.getElementById('wf_' + currentActiveCard);
+    if (waveform) waveform.classList.remove('playing');
+  }
+});
+
+testAudio.addEventListener('ended', () => {
+  // Resetear todo al terminar
+  document.querySelectorAll('.play-btn').forEach(b => { if (b.id.startsWith('playBtn')) b.textContent = '▶'; });
+  document.querySelectorAll('.waveform').forEach(w => { w.classList.remove('playing'); });
+  document.querySelectorAll('.wave-bar').forEach(b => { b.classList.remove('active'); b.style.opacity = ''; });
+  if (document.getElementById('detailPlayBtn')) document.getElementById('detailPlayBtn').textContent = '▶';
+  currentActiveCard = null;
+});
+
+function updateDetailWaveformBars(progress) {
+  const waveform = document.getElementById('detailWaveform');
+  if (!waveform) return;
+  const bars = waveform.querySelectorAll('.wave-bar');
+  const activeIndex = Math.floor((progress / 100) * bars.length);
+  bars.forEach((bar, idx) => {
+    if (idx <= activeIndex) {
+      bar.classList.add('active');
+      bar.style.opacity = '1';
+    } else {
+      bar.classList.remove('active');
+    }
+  });
+}
+
 function navigate(view, data) {
-  // Check auth for admin views
   if ((view === 'upload' || view === 'permissions' || view === 'activity') && !isLoggedIn) {
     showToast('Debes iniciar sesión para acceder a esta sección', 'info');
     openModal('login');
     return;
+  }
+
+  // Pausar audio al cambiar de vista
+  if (currentActiveCard && !testAudio.paused) {
+    testAudio.pause();
   }
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -902,8 +985,8 @@ function renderRecordings(filteredList) {
       </div>
       <div class="recording-meta">
         <span>📍 ${r.location}</span>
-        <span>📁 ${r.files} Archivos</span>
-        <span> ${formatDate(r.date)}</span>
+        <span> ${r.files} Archivos</span>
+        <span>📅 ${formatDate(r.date)}</span>
         <span>🕐 ${r.duration}</span>
       </div>
       <div class="waveform-row" onclick="event.stopPropagation();togglePlay(${r.id},'${wfId}')">
@@ -928,16 +1011,36 @@ function togglePlay(id, wfId) {
   const waveform = document.getElementById(wfId);
   if (!btn || !waveform) return;
 
-  const isPlaying = btn.textContent.trim() === '⏸';
-
-  document.querySelectorAll('.play-btn').forEach(b => b.textContent = '▶');
-  document.querySelectorAll('.waveform').forEach(w => w.classList.remove('playing'));
-
-  if (!isPlaying) {
-    btn.textContent = '⏸';
-    waveform.classList.add('playing');
-    showToast('Reproduciendo audio...', 'info');
+  // Si es la misma card y está reproduciendo, pausar
+  if (currentActiveCard === id && !testAudio.paused) {
+    testAudio.pause();
+    btn.textContent = '▶';
+    waveform.classList.remove('playing');
+    return;
   }
+
+  // Si es otra card, detener la anterior
+  if (currentActiveCard && currentActiveCard !== id) {
+    const prevBtn = document.getElementById('playBtn' + currentActiveCard);
+    const prevWf = document.getElementById('wf_' + currentActiveCard);
+    if (prevBtn) prevBtn.textContent = '▶';
+    if (prevWf) {
+      prevWf.classList.remove('playing');
+      prevWf.querySelectorAll('.wave-bar').forEach(b => { b.classList.remove('active'); b.style.opacity = ''; });
+    }
+  }
+
+  // Reproducir el audio de prueba
+  currentActiveCard = id;
+  testAudio.currentTime = 0;
+  testAudio.play().catch(err => {
+    showToast('No se pudo reproducir el audio. Verifica que audio_humedal_test.mp3 esté en la misma carpeta.', 'error');
+    console.error(err);
+    btn.textContent = '▶';
+    return;
+  });
+  waveform.classList.add('playing');
+  showToast('Reproduciendo: ' + recordings.find(r => r.id === id)?.title, 'info');
 }
 
 function loadDetail(id) {
@@ -960,43 +1063,47 @@ function loadDetail(id) {
     <div class="meta-item"><span class="meta-label">Proyecto</span><span class="meta-value">${r.project}</span></div>
   `;
 
-  detailProgress = 0;
-  detailPlaying = false;
+  // Resetear player
+  if (!testAudio.paused) testAudio.pause();
+  testAudio.currentTime = 0;
+  currentActiveCard = null;
   document.getElementById('detailProgressFill').style.width = '0%';
   document.getElementById('detailTimeCurrent').textContent = '0:00';
+  document.getElementById('detailTimeTotal').textContent = '0:00';
   document.getElementById('detailPlayBtn').textContent = '▶';
 
   generateWaveform(120, 'detailWaveform');
+
+  // Actualizar duración total cuando cargue
+  const updateDuration = () => {
+    if (testAudio.duration) {
+      const dur = Math.floor(testAudio.duration);
+      document.getElementById('detailTimeTotal').textContent = Math.floor(dur/60) + ':' + String(dur%60).padStart(2,'0');
+    }
+  };
+  if (testAudio.duration) updateDuration();
+  else testAudio.addEventListener('loadedmetadata', updateDuration, { once: true });
 }
 
 function toggleDetailPlay() {
-  detailPlaying = !detailPlaying;
   const btn = document.getElementById('detailPlayBtn');
-  if (detailPlaying) {
+  if (testAudio.paused) {
+    testAudio.play().catch(err => {
+      showToast('No se pudo reproducir el audio.', 'error');
+      console.error(err);
+    });
     btn.textContent = '⏸';
-    detailInterval = setInterval(() => {
-      detailProgress += 0.5;
-      if (detailProgress >= 100) {
-        detailProgress = 0;
-        detailPlaying = false;
-        btn.textContent = '▶';
-        clearInterval(detailInterval);
-      }
-      document.getElementById('detailProgressFill').style.width = detailProgress + '%';
-      const totalSec = 270;
-      const curSec = Math.floor(totalSec * detailProgress / 100);
-      document.getElementById('detailTimeCurrent').textContent = Math.floor(curSec/60) + ':' + String(curSec%60).padStart(2,'0');
-    }, 100);
   } else {
+    testAudio.pause();
     btn.textContent = '▶';
-    clearInterval(detailInterval);
   }
 }
 
 function seekDetail(e) {
+  if (!testAudio.duration) return;
   const rect = e.currentTarget.getBoundingClientRect();
-  detailProgress = ((e.clientX - rect.left) / rect.width) * 100;
-  document.getElementById('detailProgressFill').style.width = detailProgress + '%';
+  const pct = (e.clientX - rect.left) / rect.width;
+  testAudio.currentTime = pct * testAudio.duration;
 }
 
 function handleDownload() {
@@ -1024,7 +1131,6 @@ function applyFilters() {
   showToast(filtered.length + ' resultado' + (filtered.length !== 1 ? 's' : '') + ' encontrado' + (filtered.length !== 1 ? 's' : ''), 'info');
 }
 
-// UPLOAD
 const dropZone = document.getElementById('dropZone');
 if (dropZone) {
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -1091,7 +1197,6 @@ function publishRecording() {
   const title = document.getElementById('uploadTitle').value.trim();
   const date = document.getElementById('uploadDate').value;
 
-  // Clear errors
   document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
 
   let hasError = false;
@@ -1132,12 +1237,10 @@ function resetUpload() {
   showToast('Formulario reiniciado', 'info');
 }
 
-// PERMISSIONS
 function renderPermissions() {
   const tbody = document.getElementById('permTableBody');
   if (!tbody) return;
 
-  // Update stats
   document.getElementById('statTotal').textContent = permProjects.length;
   document.getElementById('statPublic').textContent = permProjects.filter(p => p.level === 'public').length;
   document.getElementById('statRestricted').textContent = permProjects.filter(p => p.level === 'investigador' || p.level === 'registrado').length;
@@ -1177,7 +1280,6 @@ const permDescriptions = {
 function updatePermDesc(id, level) {
   const el = document.getElementById('permDesc' + id);
   if (el) el.textContent = permDescriptions[level] || '';
-  // Hide saved indicator when changed
   const saved = document.getElementById('permSaved' + id);
   if (saved) saved.style.display = 'none';
 }
@@ -1208,7 +1310,6 @@ function renderCollections() {
   `).join('');
 }
 
-// AUTH
 function doLogin() {
   const email = document.getElementById('loginEmail').value;
   if (!email) {
@@ -1218,7 +1319,7 @@ function doLogin() {
   isLoggedIn = true;
   closeModal('login');
   updateAuthUI();
-  showToast('Sesión iniciada correctamente. Bienvenido, Dr. Valenzuela.', 'success');
+  showToast('Sesión iniciada correctamente. Bienvenido, Admin.', 'success');
 }
 
 function logout() {
@@ -1255,7 +1356,6 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.user-menu')) closeUserMenu();
 });
 
-// MODALS
 function openModal(name) {
   document.getElementById(name + 'Modal').classList.add('active');
 }
@@ -1266,7 +1366,6 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
 });
 
-// TOAST
 function showToast(msg, type) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -1281,7 +1380,6 @@ function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('active');
 }
 
-// INIT
 document.addEventListener('DOMContentLoaded', () => {
   renderRecordings();
 });
