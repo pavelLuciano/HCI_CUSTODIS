@@ -20,6 +20,7 @@
   button{cursor:pointer;font-family:inherit;border:none;background:none}
   input,select,textarea{font-family:inherit;font-size:inherit}
   img{max-width:100%;display:block}
+  *:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:4px}
 
   .header{background:var(--bg);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:100}
   .header-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
@@ -29,7 +30,7 @@
   .nav-links a{padding:8px 14px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-muted);transition:.2s;cursor:pointer}
   .nav-links a:hover,.nav-links a.active{color:var(--text);background:var(--bg-alt)}
   .nav-actions{display:flex;gap:10px;align-items:center}
-  .btn{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+  .btn{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;transition:.2s;display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:44px;justify-content:center}
   .btn-outline{border:1.5px solid var(--primary);color:var(--primary);background:transparent}
   .btn-outline:hover{background:var(--primary);color:#fff}
   .btn-primary{background:var(--primary);color:#fff;border:1.5px solid var(--primary)}
@@ -65,8 +66,7 @@
   .search-bar{max-width:640px;margin:0 auto;position:relative}
   .search-bar input{width:100%;padding:16px 52px 16px 48px;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:15px;box-shadow:var(--shadow);transition:.2s}
   .search-bar input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(46,117,182,.12)}
-  .search-bar .search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text-muted)}
-  .search-bar .mic-icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);color:var(--text-muted);cursor:pointer}
+  .search-bar .search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
 
   .section{padding:60px 24px}
   .section-inner{max-width:1280px;margin:0 auto}
@@ -94,6 +94,7 @@
   .filters-panel h3{font-size:16px;font-weight:700;margin-bottom:20px}
   .filter-group{margin-bottom:18px}
   .filter-group label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+  .filter-group .filter-hint{font-size:12px;color:var(--text-muted);display:block;margin-bottom:8px;line-height:1.4}
   .filter-group select,.filter-group input[type="text"],.filter-group input[type="date"]{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:#fff;transition:.2s}
   .filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--primary)}
   .checkbox-group{display:flex;flex-direction:column;gap:6px}
@@ -101,6 +102,10 @@
   .checkbox-group input[type="checkbox"]{accent-color:var(--primary);width:16px;height:16px}
   .btn-apply{width:100%;padding:11px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:600;font-size:14px;margin-top:8px;transition:.2s;border:none}
   .btn-apply:hover{background:var(--primary-hover)}
+
+  .mobile-filters-btn{display:none;padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;margin-bottom:16px;cursor:pointer;min-height:44px;font-size:14px;align-items:center;gap:8px}
+  .filters-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:89;display:none}
+  .filters-overlay.active{display:block}
 
   .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
   .results-header h2{font-size:20px;font-weight:700}
@@ -146,16 +151,27 @@
   .meta-item{display:flex;flex-direction:column;gap:2px}
   .meta-item .meta-label{font-size:12px;color:var(--text-muted);font-weight:500}
   .meta-item .meta-value{font-size:14px;font-weight:500}
+  .meta-item input{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;width:100%}
+  .meta-item input:focus{outline:none;border-color:var(--primary)}
   .license-box{background:rgba(232,178,58,.1);border:1px solid rgba(232,178,58,.3);border-radius:var(--radius-sm);padding:14px;margin-top:16px}
   .license-box p{font-size:13px;color:#8a6a10}
   .license-box strong{color:#6b5200}
 
-  .map-container{border-radius:var(--radius);overflow:hidden;height:240px;background:var(--bg-alt);position:relative}
-  .map-container img{width:100%;height:100%;object-fit:cover}
-  .map-pin{position:absolute;width:20px;height:20px;background:var(--primary);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3);top:50%;left:50%;transform:translate(-50%,-50%)}
+  .map-container{border-radius:var(--radius);overflow:hidden;height:240px;background:linear-gradient(135deg,#c8e6c9 0%,#a5d6a7 100%);position:relative;display:flex;align-items:center;justify-content:center}
+  .map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(46,117,182,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(46,117,182,.1) 1px,transparent 1px);background-size:40px 40px}
+  .map-pin{position:absolute;width:24px;height:24px;background:var(--primary);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3);top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;cursor:pointer}
   .map-pin::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--primary)}
+  .map-pin-pulse{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(46,117,182,.2);border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%{transform:translate(-50%,-50%) scale(.8);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+  .map-tooltip{position:absolute;bottom:12px;left:12px;background:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;box-shadow:var(--shadow);z-index:3}
+  .map-tooltip strong{display:block;color:var(--text)}
+  .map-tooltip span{color:var(--text-muted)}
 
-  .detail-actions{display:flex;gap:12px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border-light)}
+  .detail-actions{display:flex;flex-direction:column;gap:12px;padding-top:8px;border-top:1px solid var(--border-light)}
+  .download-warning{background:rgba(232,178,58,.1);border:1px solid rgba(232,178,58,.3);padding:12px 16px;border-radius:8px;display:flex;align-items:center;gap:10px}
+  .download-warning p{font-size:14px;color:#8a6a10;margin:0;flex:1}
+  .download-warning strong{color:#6b5200}
+  .download-actions-row{display:flex;gap:12px;flex-wrap:wrap}
 
   .upload-layout{max-width:800px;margin:0 auto;padding:40px 24px}
   .upload-card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
@@ -248,9 +264,10 @@
   .stat-card .stat-value{font-size:28px;font-weight:700;color:var(--primary)}
   .stat-card .stat-label{font-size:13px;color:var(--text-muted);margin-top:4px}
 
+  .edit-mode-indicator{display:inline-block;background:var(--warning);color:#fff;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;margin-left:8px}
+
   @media(max-width:900px){
     .explorer-layout{grid-template-columns:1fr}
-    .filters-panel{position:static}
     .detail-grid{grid-template-columns:1fr}
     .form-row{grid-template-columns:1fr}
     .col-grid{grid-template-columns:1fr}
@@ -271,12 +288,31 @@
     .upload-actions{padding:16px}
     .detail-body{padding:20px}
     .file-list{padding:0 16px}
+    .detail-title{font-size:22px}
+    
+    .mobile-filters-btn{display:inline-flex}
+    .filters-panel{
+      position:fixed;
+      top:64px;
+      left:-100%;
+      width:85%;
+      max-width:320px;
+      height:calc(100vh - 64px);
+      z-index:90;
+      transition:left 0.3s ease;
+      overflow-y:auto;
+      box-shadow:2px 0 8px rgba(0,0,0,0.15);
+      border-radius:0;
+    }
+    .filters-panel.active{left:0}
+  }
+  @media(min-width:701px){
+    .filters-overlay{display:none !important}
   }
 </style>
 </head>
 <body>
 
-<!-- AUDIO GLOBAL DE PRUEBA -->
 <audio id="globalAudio" src="audio_humedal_test.mp3" preload="auto"></audio>
 
 <header class="header">
@@ -309,7 +345,7 @@
           <button class="logout" onclick="logout()">Cerrar sesión</button>
         </div>
       </div>
-      <button class="hamburger" onclick="toggleMobileNav()">
+      <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menú">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
     </div>
@@ -317,7 +353,7 @@
 </header>
 
 <div class="nav-mobile" id="mobileNav">
-  <button class="nav-mobile-close" onclick="toggleMobileNav()">
+  <button class="nav-mobile-close" onclick="toggleMobileNav()" aria-label="Cerrar menú">
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
   </button>
   <a onclick="navigate('home');toggleMobileNav()">Inicio</a>
@@ -333,18 +369,18 @@
 
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('login')">
+    <button class="modal-close" onclick="closeModal('login')" aria-label="Cerrar">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
     <h2>Iniciar sesión</h2>
     <p>Accede a tu cuenta para descargar archivos y gestionar proyectos.</p>
     <div class="form-group">
-      <label>Correo electrónico</label>
+      <label for="loginEmail">Correo electrónico</label>
       <input type="email" id="loginEmail" placeholder="tu@correo.cl" value="admin@custodis.cl">
     </div>
     <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" placeholder="••••••••" value="password">
+      <label for="loginPassword">Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" value="password">
     </div>
     <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Entrar</button>
   </div>
@@ -352,7 +388,7 @@
 
 <div class="modal-overlay" id="registerModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('register')">
+    <button class="modal-close" onclick="closeModal('register')" aria-label="Cerrar">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
     <h2>Crear cuenta</h2>
@@ -381,8 +417,7 @@
       <p>Explora y escucha grabaciones de naturaleza y humedales del sur de Chile. Explora y escucha sin crear una cuenta.</p>
       <div class="search-bar">
         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" placeholder="Busca por especie, lugar o ecosistema..." id="homeSearch" onkeydown="if(event.key==='Enter')navigate('explorer')">
-        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+        <input type="text" placeholder="Busca por especie, lugar o ecosistema..." id="homeSearch" onkeydown="if(event.key==='Enter')navigate('explorer')" aria-label="Buscar grabaciones">
       </div>
     </section>
 
@@ -443,10 +478,10 @@
   <!-- EXPLORER -->
   <div class="view" id="view-explorer">
     <div class="explorer-layout">
-      <aside class="filters-panel">
+      <aside class="filters-panel" id="filtersPanel">
         <h3>Filtros</h3>
         <div class="filter-group">
-          <label>Región</label>
+          <label for="filterRegion">Región</label>
           <select id="filterRegion">
             <option value="">Todas las regiones</option>
             <option>Los Ríos</option>
@@ -456,6 +491,7 @@
         </div>
         <div class="filter-group">
           <label>Ecosistema</label>
+          <span class="filter-hint">Ej: Humedal, bosque nativo, costa...</span>
           <div class="checkbox-group">
             <label><input type="checkbox" value="Humedal" checked> Humedal</label>
             <label><input type="checkbox" value="Bosque Nativo"> Bosque Nativo</label>
@@ -463,7 +499,7 @@
           </div>
         </div>
         <div class="filter-group">
-          <label>Especie</label>
+          <label for="filterSpecies">Especie</label>
           <input type="text" placeholder="Ej: Traro, Hued-Hued" id="filterSpecies">
         </div>
         <div class="filter-group">
@@ -475,6 +511,12 @@
       </aside>
 
       <div class="results-area">
+        <button class="mobile-filters-btn" onclick="toggleMobileFilters()" aria-label="Mostrar filtros">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtros
+        </button>
+        <div class="filters-overlay" id="filtersOverlay" onclick="toggleMobileFilters()"></div>
+        
         <div class="results-header">
           <h2 id="resultsCount">0 resultados encontrados</h2>
           <div style="display:flex;align-items:center;gap:8px">
@@ -506,46 +548,40 @@
           <div class="detail-player">
             <div class="detail-waveform" id="detailWaveform"></div>
             <div class="player-controls">
-              <button class="play-btn" id="detailPlayBtn" onclick="toggleDetailPlay()">▶</button>
+              <button class="play-btn" id="detailPlayBtn" onclick="toggleDetailPlay()" aria-label="Reproducir">▶</button>
               <span class="player-time" id="detailTimeCurrent">0:00</span>
-              <div class="player-progress" onclick="seekDetail(event)">
+              <div class="player-progress" onclick="seekDetail(event)" role="progressbar" aria-label="Progreso de reproducción">
                 <div class="player-progress-fill" id="detailProgressFill"></div>
               </div>
-              <span class="player-time" id="detailTimeTotal">4:30</span>
+              <span class="player-time" id="detailTimeTotal">0:00</span>
             </div>
           </div>
 
           <div class="detail-grid">
             <div class="meta-section">
-              <h4>Información de la grabación</h4>
+              <h4>Información de la grabación <span class="edit-mode-indicator" id="editIndicator" style="display:none">✎ Editando</span></h4>
               <div class="meta-list" id="detailMetaList"></div>
               <div class="license-box">
                 <p><strong>Licencia:</strong> Uso permitido con atribución al proyecto y al autor. Uso académico y artístico permitido citando la fuente.</p>
               </div>
+              <div style="margin-top:12px;display:flex;gap:8px" id="editActions" style="display:none"></div>
             </div>
             <div class="meta-section">
               <h4>Ubicación geográfica</h4>
-              <div class="map-container" style="background:linear-gradient(135deg,#c8e6c9 0%,#a5d6a7 100%);display:flex;align-items:center;justify-content:center">
-                <div style="text-align:center;color:#2e5f8f">
-                  <div style="font-size:48px;margin-bottom:8px">📍</div>
-                  <div style="font-size:14px;font-weight:600">Humedal Carlos Anwandter</div>
-                  <div style="font-size:12px">Valdivia, Los Ríos</div>
+              <div class="map-container">
+                <div class="map-grid"></div>
+                <div class="map-pin-pulse"></div>
+                <div class="map-pin" title="Ubicación de la grabación"></div>
+                <div class="map-tooltip">
+                  <strong id="mapTooltipTitle">Humedal Carlos Anwandter</strong>
+                  <span id="mapTooltipCoords">Valdivia, Los Ríos</span>
                 </div>
-                <div class="map-pin"></div>
               </div>
               <p style="font-size:13px;color:var(--text-muted);margin-top:8px" id="detailLocation">Humedal Carlos Anwandter, Valdivia, Región de Los Ríos, Chile</p>
             </div>
           </div>
 
-          <div class="detail-actions">
-            <button class="btn btn-primary btn-lg" onclick="handleDownload()">
-              ⬇ Descargar WAV · <span id="detailSize">42.2 MB</span>
-            </button>
-            <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">
-              ↗ Compartir
-            </button>
-            <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
-          </div>
+          <div class="detail-actions" id="detailActions"></div>
         </div>
       </div>
     </div>
@@ -574,35 +610,35 @@
           <h3>Metadatos obligatorios</h3>
           <div class="form-row">
             <div class="form-group full" id="fg-title">
-              <label>Título de la grabación *</label>
+              <label for="uploadTitle">Título de la grabación *</label>
               <input type="text" id="uploadTitle" placeholder="Ej: Amanecer en Humedal – Traro">
               <span class="error-msg">Falta el título de la grabación. Complétalo para poder publicar.</span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group" id="fg-species">
-              <label>Especie (si se conoce)</label>
+              <label for="uploadSpecies">Especie (si se conoce)</label>
               <input type="text" id="uploadSpecies" placeholder="Ej: Traro">
             </div>
             <div class="form-group" id="fg-date">
-              <label>Fecha de captura *</label>
+              <label for="uploadDate">Fecha de captura *</label>
               <input type="date" id="uploadDate">
               <span class="error-msg">Falta la fecha de captura. Complétala para poder publicar.</span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Coordenadas</label>
+              <label for="uploadCoords">Coordenadas</label>
               <input type="text" id="uploadCoords" placeholder="-39.8196, -73.2452">
             </div>
             <div class="form-group">
-              <label>Dispositivo de captura</label>
+              <label for="uploadDevice">Dispositivo de captura</label>
               <input type="text" id="uploadDevice" placeholder="Ej: Song Meter SM4">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full">
-              <label>Proyecto asociado</label>
+              <label for="uploadProject">Proyecto asociado</label>
               <select id="uploadProject">
                 <option value="">Selecciona un proyecto...</option>
                 <option>Monitoreo Humedal Carlos Anwandter</option>
@@ -650,9 +686,7 @@
 
         <div class="upload-actions">
           <button class="btn btn-outline btn-lg" onclick="resetUpload()">Cancelar</button>
-          <button class="btn btn-primary btn-lg" onclick="publishRecording()">
-            ✓ Publicar grabación
-          </button>
+          <button class="btn btn-primary btn-lg" onclick="publishRecording()">✓ Publicar grabación</button>
         </div>
       </div>
     </div>
@@ -692,9 +726,7 @@
             <p>Selecciona el nivel de acceso para cada grabación o proyecto</p>
           </div>
         </div>
-        <button class="btn btn-primary btn-lg" onclick="showToast('Nuevo proyecto creado','success')">
-          ＋ Nuevo proyecto
-        </button>
+        <button class="btn btn-primary btn-lg" onclick="showToast('Nuevo proyecto creado','success')">＋ Nuevo proyecto</button>
       </div>
 
       <div class="perm-table-wrap">
@@ -819,12 +851,12 @@
 
 <script>
 const recordings = [
-  {id:1,title:'Amanecer en Humedal – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-12',duration:'4:30',files:15,size:'42.2MB',format:'WAV',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos'},
-  {id:2,title:'Canto matutino – Hued-Hued',region:'Los Ríos',ecosystem:'Bosque Nativo',species:'Hued-Hued',date:'2026-09-28',duration:'3:15',files:8,size:'28.4MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Valdivia, Los Ríos'},
-  {id:3,title:'Noche en el humedal – Ranas',region:'Los Lagos',ecosystem:'Humedal',species:'Rana de Darwin',date:'2026-10-05',duration:'6:20',files:22,size:'55.1MB',format:'FLAC',device:'Song Meter SM4',project:'Anfibios del Sur',location:'Puerto Montt, Los Lagos'},
-  {id:4,title:'Vientos costeros – Gaviotas',region:'Los Lagos',ecosystem:'Costa',species:'Gaviota dominicana',date:'2026-08-15',duration:'2:45',files:5,size:'18.7MB',format:'WAV',device:'Zoom H6',project:'Costa Patagónica',location:'Puerto Montt, Los Lagos'},
-  {id:5,title:'Bosque lluvioso – Chucao',region:'Araucanía',ecosystem:'Bosque Nativo',species:'Chucao',date:'2026-10-01',duration:'5:10',files:12,size:'38.9MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Temuco, Araucanía'},
-  {id:6,title:'Amanecer ribereño – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-10',duration:'4:00',files:10,size:'35.2MB',format:'FLAC',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos'},
+  {id:1,title:'Amanecer en Humedal – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-12',duration:'4:30',files:15,size:'42.2MB',format:'WAV',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos',coords:'-39.8196, -73.2452'},
+  {id:2,title:'Canto matutino – Hued-Hued',region:'Los Ríos',ecosystem:'Bosque Nativo',species:'Hued-Hued',date:'2026-09-28',duration:'3:15',files:8,size:'28.4MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Valdivia, Los Ríos',coords:'-39.7500, -73.1800'},
+  {id:3,title:'Noche en el humedal – Ranas',region:'Los Lagos',ecosystem:'Humedal',species:'Rana de Darwin',date:'2026-10-05',duration:'6:20',files:22,size:'55.1MB',format:'FLAC',device:'Song Meter SM4',project:'Anfibios del Sur',location:'Puerto Montt, Los Lagos',coords:'-40.1200, -73.3500'},
+  {id:4,title:'Vientos costeros – Gaviotas',region:'Los Lagos',ecosystem:'Costa',species:'Gaviota dominicana',date:'2026-08-15',duration:'2:45',files:5,size:'18.7MB',format:'WAV',device:'Zoom H6',project:'Costa Patagónica',location:'Puerto Montt, Los Lagos',coords:'-41.2000, -73.0500'},
+  {id:5,title:'Bosque lluvioso – Chucao',region:'Araucanía',ecosystem:'Bosque Nativo',species:'Chucao',date:'2026-10-01',duration:'5:10',files:12,size:'38.9MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Temuco, Araucanía',coords:'-38.9500, -72.1200'},
+  {id:6,title:'Amanecer ribereño – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-10',duration:'4:00',files:10,size:'35.2MB',format:'FLAC',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos',coords:'-39.8300, -73.2100'},
 ];
 
 const collections = [
@@ -836,46 +868,34 @@ const collections = [
 
 const permProjects = [
   {id:1,name:'Monitoreo Humedal Miraflores',date:'12 de Oct del 2023',files:53,level:'investigador',desc:'Los usuarios con cuenta verificada pueden descargar en WAV/FLAC.'},
-  {id:2,name:'Monitoreo Humedal Miraflores',date:'12 de Oct del 2023',files:33,level:'public',desc:'Cualquier visitante puede escuchar, pero no descargar.'},
+  {id:2,name:'Monitoreo Humedal Miraflores (subset)',date:'12 de Oct del 2023',files:33,level:'public',desc:'Cualquier visitante puede escuchar, pero no descargar.'},
   {id:3,name:'Bosque Nativo Valdiviano',date:'05 de Sep del 2024',files:28,level:'public',desc:'Cualquier visitante puede escuchar, pero no descargar.'},
   {id:4,name:'Anfibios del Sur',date:'20 de Mar del 2025',files:12,level:'admin',desc:'Solo el administrador puede acceder y gestionar los archivos.'},
 ];
 
-// AUDIO GLOBAL DE PRUEBA
 const testAudio = document.getElementById('globalAudio');
-let currentActiveCard = null; // id de la card que está reproduciendo
-let detailInterval = null;
+let currentActiveCard = null;
 let uploadedFiles = [];
 let isLoggedIn = false;
+let isEditingMetadata = false;
+let currentDetailId = null;
 
-// Sincronizar waveforms con el audio real
 testAudio.addEventListener('timeupdate', () => {
   if (!testAudio.duration) return;
   const progress = (testAudio.currentTime / testAudio.duration) * 100;
 
-  // Actualizar card activa
   if (currentActiveCard) {
     const waveform = document.getElementById('wf_' + currentActiveCard);
     if (waveform) {
       const bars = waveform.querySelectorAll('.wave-bar');
       const activeIndex = Math.floor((progress / 100) * bars.length);
       bars.forEach((bar, idx) => {
-        if (idx <= activeIndex) {
-          bar.classList.add('active');
-          bar.style.opacity = '1';
-        } else {
-          bar.classList.remove('active');
-        }
+        if (idx <= activeIndex) { bar.classList.add('active'); bar.style.opacity = '1'; }
+        else { bar.classList.remove('active'); }
       });
-    }
-    // Actualizar tiempo
-    const btn = document.getElementById('playBtn' + currentActiveCard);
-    if (btn) {
-      btn.textContent = '';
     }
   }
 
-  // Actualizar detalle si está en esa vista
   if (document.getElementById('view-detail').classList.contains('active')) {
     document.getElementById('detailProgressFill').style.width = progress + '%';
     const curSec = Math.floor(testAudio.currentTime);
@@ -889,6 +909,8 @@ testAudio.addEventListener('play', () => {
     const waveform = document.getElementById('wf_' + currentActiveCard);
     if (waveform) waveform.classList.add('playing');
   }
+  const btn = document.getElementById('detailPlayBtn');
+  if (btn) btn.textContent = '⏸';
 });
 
 testAudio.addEventListener('pause', () => {
@@ -896,14 +918,16 @@ testAudio.addEventListener('pause', () => {
     const waveform = document.getElementById('wf_' + currentActiveCard);
     if (waveform) waveform.classList.remove('playing');
   }
+  const btn = document.getElementById('detailPlayBtn');
+  if (btn && !testAudio.paused === false) btn.textContent = '▶';
 });
 
 testAudio.addEventListener('ended', () => {
-  // Resetear todo al terminar
-  document.querySelectorAll('.play-btn').forEach(b => { if (b.id.startsWith('playBtn')) b.textContent = '▶'; });
-  document.querySelectorAll('.waveform').forEach(w => { w.classList.remove('playing'); });
+  document.querySelectorAll('.play-btn').forEach(b => { if (b.id && b.id.startsWith('playBtn')) b.textContent = '▶'; });
+  document.querySelectorAll('.waveform').forEach(w => w.classList.remove('playing'));
   document.querySelectorAll('.wave-bar').forEach(b => { b.classList.remove('active'); b.style.opacity = ''; });
-  if (document.getElementById('detailPlayBtn')) document.getElementById('detailPlayBtn').textContent = '▶';
+  const btn = document.getElementById('detailPlayBtn');
+  if (btn) btn.textContent = '▶';
   currentActiveCard = null;
 });
 
@@ -913,12 +937,8 @@ function updateDetailWaveformBars(progress) {
   const bars = waveform.querySelectorAll('.wave-bar');
   const activeIndex = Math.floor((progress / 100) * bars.length);
   bars.forEach((bar, idx) => {
-    if (idx <= activeIndex) {
-      bar.classList.add('active');
-      bar.style.opacity = '1';
-    } else {
-      bar.classList.remove('active');
-    }
+    if (idx <= activeIndex) { bar.classList.add('active'); bar.style.opacity = '1'; }
+    else { bar.classList.remove('active'); }
   });
 }
 
@@ -929,10 +949,7 @@ function navigate(view, data) {
     return;
   }
 
-  // Pausar audio al cambiar de vista
-  if (currentActiveCard && !testAudio.paused) {
-    testAudio.pause();
-  }
+  if (currentActiveCard && !testAudio.paused) testAudio.pause();
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = document.getElementById('view-' + view);
@@ -985,12 +1002,12 @@ function renderRecordings(filteredList) {
       </div>
       <div class="recording-meta">
         <span>📍 ${r.location}</span>
-        <span> ${r.files} Archivos</span>
-        <span>📅 ${formatDate(r.date)}</span>
+        <span>📁 ${r.files} Archivos</span>
+        <span> ${formatDate(r.date)}</span>
         <span>🕐 ${r.duration}</span>
       </div>
       <div class="waveform-row" onclick="event.stopPropagation();togglePlay(${r.id},'${wfId}')">
-        <button class="play-btn" id="playBtn${r.id}">▶</button>
+        <button class="play-btn" id="playBtn${r.id}" aria-label="Reproducir">▶</button>
         <div class="waveform" id="${wfId}"></div>
       </div>
     </div>
@@ -1011,7 +1028,6 @@ function togglePlay(id, wfId) {
   const waveform = document.getElementById(wfId);
   if (!btn || !waveform) return;
 
-  // Si es la misma card y está reproduciendo, pausar
   if (currentActiveCard === id && !testAudio.paused) {
     testAudio.pause();
     btn.textContent = '▶';
@@ -1019,7 +1035,6 @@ function togglePlay(id, wfId) {
     return;
   }
 
-  // Si es otra card, detener la anterior
   if (currentActiveCard && currentActiveCard !== id) {
     const prevBtn = document.getElementById('playBtn' + currentActiveCard);
     const prevWf = document.getElementById('wf_' + currentActiveCard);
@@ -1030,14 +1045,11 @@ function togglePlay(id, wfId) {
     }
   }
 
-  // Reproducir el audio de prueba
   currentActiveCard = id;
   testAudio.currentTime = 0;
   testAudio.play().catch(err => {
     showToast('No se pudo reproducir el audio. Verifica que audio_humedal_test.mp3 esté en la misma carpeta.', 'error');
-    console.error(err);
     btn.textContent = '▶';
-    return;
   });
   waveform.classList.add('playing');
   showToast('Reproduciendo: ' + recordings.find(r => r.id === id)?.title, 'info');
@@ -1045,9 +1057,13 @@ function togglePlay(id, wfId) {
 
 function loadDetail(id) {
   const r = recordings.find(x => x.id === id) || recordings[0];
+  currentDetailId = id;
+  isEditingMetadata = false;
+  
   document.getElementById('detailTitle').textContent = r.title;
-  document.getElementById('detailSize').textContent = r.size;
   document.getElementById('detailLocation').textContent = r.location + ', Chile';
+  document.getElementById('mapTooltipTitle').textContent = r.project;
+  document.getElementById('mapTooltipCoords').textContent = r.location;
 
   document.getElementById('detailSubtitle').innerHTML = `
     <span>📍 ${r.location}</span>
@@ -1056,25 +1072,17 @@ function loadDetail(id) {
     <span>🕐 ${r.duration}</span>
   `;
 
-  document.getElementById('detailMetaList').innerHTML = `
-    <div class="meta-item"><span class="meta-label">Especie</span><span class="meta-value">${r.species}</span></div>
-    <div class="meta-item"><span class="meta-label">Fecha de captura</span><span class="meta-value">${formatDate(r.date)} — 06:15 AM</span></div>
-    <div class="meta-item"><span class="meta-label">Dispositivo</span><span class="meta-value">${r.device}</span></div>
-    <div class="meta-item"><span class="meta-label">Proyecto</span><span class="meta-value">${r.project}</span></div>
-  `;
+  renderMetaList(r);
 
-  // Resetear player
   if (!testAudio.paused) testAudio.pause();
   testAudio.currentTime = 0;
   currentActiveCard = null;
   document.getElementById('detailProgressFill').style.width = '0%';
   document.getElementById('detailTimeCurrent').textContent = '0:00';
-  document.getElementById('detailTimeTotal').textContent = '0:00';
   document.getElementById('detailPlayBtn').textContent = '▶';
 
   generateWaveform(120, 'detailWaveform');
 
-  // Actualizar duración total cuando cargue
   const updateDuration = () => {
     if (testAudio.duration) {
       const dur = Math.floor(testAudio.duration);
@@ -1083,6 +1091,108 @@ function loadDetail(id) {
   };
   if (testAudio.duration) updateDuration();
   else testAudio.addEventListener('loadedmetadata', updateDuration, { once: true });
+
+  renderDetailActions(r);
+}
+
+function renderMetaList(r) {
+  const metaList = document.getElementById('detailMetaList');
+  if (isEditingMetadata && isLoggedIn) {
+    metaList.innerHTML = `
+      <div class="meta-item"><span class="meta-label">Especie</span><input type="text" id="editSpecies" value="${r.species}"></div>
+      <div class="meta-item"><span class="meta-label">Fecha de captura</span><input type="date" id="editDate" value="${r.date}"></div>
+      <div class="meta-item"><span class="meta-label">Dispositivo</span><input type="text" id="editDevice" value="${r.device}"></div>
+      <div class="meta-item"><span class="meta-label">Proyecto</span><input type="text" id="editProject" value="${r.project}"></div>
+      <div class="meta-item"><span class="meta-label">Coordenadas</span><input type="text" id="editCoords" value="${r.coords || ''}"></div>
+    `;
+    document.getElementById('editIndicator').style.display = 'inline-block';
+    document.getElementById('editActions').style.display = 'flex';
+    document.getElementById('editActions').innerHTML = `
+      <button class="btn btn-primary" onclick="saveMetadata(${r.id})">💾 Guardar cambios</button>
+      <button class="btn btn-outline" onclick="cancelEdit(${r.id})">Cancelar</button>
+    `;
+  } else {
+    metaList.innerHTML = `
+      <div class="meta-item"><span class="meta-label">Especie</span><span class="meta-value">${r.species}</span></div>
+      <div class="meta-item"><span class="meta-label">Fecha de captura</span><span class="meta-value">${formatDate(r.date)} — 06:15 AM</span></div>
+      <div class="meta-item"><span class="meta-label">Dispositivo</span><span class="meta-value">${r.device}</span></div>
+      <div class="meta-item"><span class="meta-label">Proyecto</span><span class="meta-value">${r.project}</span></div>
+    `;
+    document.getElementById('editIndicator').style.display = 'none';
+    document.getElementById('editActions').style.display = 'none';
+  }
+}
+
+function renderDetailActions(r) {
+  const actionsContainer = document.getElementById('detailActions');
+  if (!isLoggedIn) {
+    actionsContainer.innerHTML = `
+      <div class="download-warning">
+        <span style="font-size:20px">🔒</span>
+        <p><strong>Inicia sesión</strong> para descargar este archivo en alta calidad (WAV/FLAC).</p>
+      </div>
+      <div class="download-actions-row">
+        <button class="btn btn-primary btn-lg" onclick="handleDownload()">⬇ Descargar WAV · ${r.size}</button>
+        <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">↗ Compartir</button>
+        <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
+      </div>
+    `;
+  } else {
+    actionsContainer.innerHTML = `
+      <div class="download-actions-row">
+        <button class="btn btn-primary btn-lg" onclick="handleDownload()">⬇ Descargar WAV · ${r.size}</button>
+        <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">↗ Compartir</button>
+        <button class="btn btn-ghost btn-lg" onclick="toggleEditMetadata(${r.id})">✎ Editar metadatos</button>
+        <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
+      </div>
+    `;
+  }
+}
+
+function toggleEditMetadata(id) {
+  isEditingMetadata = !isEditingMetadata;
+  const r = recordings.find(x => x.id === id);
+  if (r) {
+    renderMetaList(r);
+    showToast(isEditingMetadata ? 'Modo edición activado. Modifica los campos y guarda los cambios.' : 'Edición cancelada', 'info');
+  }
+}
+
+function saveMetadata(id) {
+  const r = recordings.find(x => x.id === id);
+  if (!r) return;
+  
+  const newSpecies = document.getElementById('editSpecies').value;
+  const newDate = document.getElementById('editDate').value;
+  const newDevice = document.getElementById('editDevice').value;
+  const newProject = document.getElementById('editProject').value;
+  const newCoords = document.getElementById('editCoords').value;
+  
+  if (!newDate) {
+    showToast('La fecha de captura es obligatoria.', 'error');
+    return;
+  }
+  
+  r.species = newSpecies;
+  r.date = newDate;
+  r.device = newDevice;
+  r.project = newProject;
+  r.coords = newCoords;
+  
+  isEditingMetadata = false;
+  renderMetaList(r);
+  renderDetailActions(r);
+  showToast('Metadatos actualizados correctamente.', 'success');
+}
+
+function cancelEdit(id) {
+  isEditingMetadata = false;
+  const r = recordings.find(x => x.id === id);
+  if (r) {
+    renderMetaList(r);
+    renderDetailActions(r);
+  }
+  showToast('Edición cancelada', 'info');
 }
 
 function toggleDetailPlay() {
@@ -1090,7 +1200,6 @@ function toggleDetailPlay() {
   if (testAudio.paused) {
     testAudio.play().catch(err => {
       showToast('No se pudo reproducir el audio.', 'error');
-      console.error(err);
     });
     btn.textContent = '⏸';
   } else {
@@ -1108,7 +1217,7 @@ function seekDetail(e) {
 
 function handleDownload() {
   if (!isLoggedIn) {
-    showToast('Inicia sesión para descargar este archivo', 'info');
+    showToast('Inicia sesión para descargar este archivo en alta calidad', 'info');
     setTimeout(() => openModal('login'), 800);
   } else {
     showToast('Descarga iniciada. El archivo se guardará en tu dispositivo.', 'success');
@@ -1129,6 +1238,18 @@ function applyFilters() {
 
   renderRecordings(filtered);
   showToast(filtered.length + ' resultado' + (filtered.length !== 1 ? 's' : '') + ' encontrado' + (filtered.length !== 1 ? 's' : ''), 'info');
+  
+  // Cerrar panel móvil si está abierto
+  const panel = document.getElementById('filtersPanel');
+  if (panel.classList.contains('active')) toggleMobileFilters();
+}
+
+function toggleMobileFilters() {
+  const panel = document.getElementById('filtersPanel');
+  const overlay = document.getElementById('filtersOverlay');
+  panel.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = panel.classList.contains('active') ? 'hidden' : '';
 }
 
 const dropZone = document.getElementById('dropZone');
@@ -1200,28 +1321,13 @@ function publishRecording() {
   document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
 
   let hasError = false;
-  if (!title) {
-    document.getElementById('fg-title').classList.add('has-error');
-    hasError = true;
-  }
-  if (!date) {
-    document.getElementById('fg-date').classList.add('has-error');
-    hasError = true;
-  }
-  if (uploadedFiles.length === 0) {
-    showToast('Selecciona al menos un archivo de audio.', 'error');
-    return;
-  }
-  if (hasError) {
-    showToast('Faltan campos obligatorios. Revisa el formulario.', 'error');
-    return;
-  }
+  if (!title) { document.getElementById('fg-title').classList.add('has-error'); hasError = true; }
+  if (!date) { document.getElementById('fg-date').classList.add('has-error'); hasError = true; }
+  if (uploadedFiles.length === 0) { showToast('Selecciona al menos un archivo de audio.', 'error'); return; }
+  if (hasError) { showToast('Faltan campos obligatorios. Revisa el formulario.', 'error'); return; }
 
   showToast('Grabación publicada correctamente.', 'success');
-  setTimeout(() => {
-    resetUpload();
-    navigate('explorer');
-  }, 1500);
+  setTimeout(() => { resetUpload(); navigate('explorer'); }, 1500);
 }
 
 function resetUpload() {
@@ -1312,18 +1418,22 @@ function renderCollections() {
 
 function doLogin() {
   const email = document.getElementById('loginEmail').value;
-  if (!email) {
-    showToast('Ingresa tu correo electrónico', 'error');
-    return;
-  }
+  if (!email) { showToast('Ingresa tu correo electrónico', 'error'); return; }
   isLoggedIn = true;
   closeModal('login');
   updateAuthUI();
   showToast('Sesión iniciada correctamente. Bienvenido, Admin.', 'success');
+  
+  // Si está en detalle, re-renderizar acciones
+  if (currentDetailId) {
+    const r = recordings.find(x => x.id === currentDetailId);
+    if (r) renderDetailActions(r);
+  }
 }
 
 function logout() {
   isLoggedIn = false;
+  isEditingMetadata = false;
   closeUserMenu();
   updateAuthUI();
   navigate('home');
