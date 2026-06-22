@@ -2,9 +2,12 @@ const custodisData = window.CustodisData || { recordings: [], collections: [], p
 const recordings = custodisData.recordings;
 const collections = custodisData.collections;
 const permProjects = custodisData.permProjects;
+const audioHumedalTest = 'assets/audio_humedal_test.mp3';
 
 let wavesurfer = null;
 let uploadedFiles = [];
+let explorerAudio = null;
+let activeExplorerAudioId = null;
 
 const permDescriptions = {
   public: 'Cualquier visitante puede escuchar, pero no descargar.',
@@ -88,6 +91,27 @@ function formatPlaybackTime(seconds) {
   return minutes + ':' + String(remaining).padStart(2, '0');
 }
 
+function getRecordingAudioUrl(id) {
+  const recording = recordings.find(item => item.id === id);
+  return recording?.audioUrl || audioHumedalTest;
+}
+
+function resetExplorerPlaybackUI() {
+  document.querySelectorAll('.play-btn').forEach(button => {
+    button.textContent = '▶';
+  });
+  document.querySelectorAll('.waveform').forEach(waveform => {
+    waveform.classList.remove('playing');
+  });
+}
+
+function setExplorerPlaybackUI(id, wfId, isPlaying) {
+  const btn = document.getElementById('playBtn' + id);
+  const waveform = document.getElementById(wfId);
+  if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
+  if (waveform) waveform.classList.toggle('playing', isPlaying);
+}
+
 function updateDetailProgress(currentTime) {
   if (!wavesurfer) return;
 
@@ -148,22 +172,44 @@ function renderRecordings(filteredList) {
 }
 
 function togglePlay(id, wfId) {
-  const btn = document.getElementById('playBtn' + id);
-  const waveform = document.getElementById(wfId);
-  if (!btn || !waveform) return;
+  const isCurrentTrack = activeExplorerAudioId === id && explorerAudio && !explorerAudio.paused;
 
-  const isPlaying = btn.textContent.trim() === '⏸';
-
-  document.querySelectorAll('.play-btn').forEach(button => {
-    button.textContent = '▶';
-  });
-  document.querySelectorAll('.waveform').forEach(wave => wave.classList.remove('playing'));
-
-  if (!isPlaying) {
-    btn.textContent = '⏸';
-    waveform.classList.add('playing');
-    showToast('Reproduciendo audio...', 'info');
+  if (isCurrentTrack) {
+    explorerAudio.pause();
+    setExplorerPlaybackUI(id, wfId, false);
+    activeExplorerAudioId = null;
+    return;
   }
+
+  if (!explorerAudio) {
+    explorerAudio = new Audio();
+    explorerAudio.preload = 'metadata';
+    explorerAudio.addEventListener('ended', () => {
+      if (activeExplorerAudioId !== null) {
+        setExplorerPlaybackUI(activeExplorerAudioId, 'wf_' + activeExplorerAudioId, false);
+        activeExplorerAudioId = null;
+      }
+    });
+    explorerAudio.addEventListener('error', () => {
+      if (activeExplorerAudioId !== null) {
+        setExplorerPlaybackUI(activeExplorerAudioId, 'wf_' + activeExplorerAudioId, false);
+        activeExplorerAudioId = null;
+      }
+      showToast('No se pudo cargar el audio de prueba.', 'error');
+    });
+  }
+
+  resetExplorerPlaybackUI();
+  activeExplorerAudioId = id;
+  explorerAudio.src = getRecordingAudioUrl(id);
+  explorerAudio.currentTime = 0;
+  setExplorerPlaybackUI(id, wfId, true);
+
+  explorerAudio.play().catch(() => {
+    setExplorerPlaybackUI(id, wfId, false);
+    activeExplorerAudioId = null;
+    showToast('No se pudo reproducir el audio de prueba.', 'error');
+  });
 }
 
 function loadDetail(id) {
@@ -221,7 +267,7 @@ function loadDetail(id) {
   updateDetailProgress(0);
   setDetailPlayIcon(false);
 
-  const audioUrl = 'assets/audio_prueba.mp3';
+  const audioUrl = recording.audioUrl || audioHumedalTest;
   wavesurfer = WaveSurfer.create({
     container: '#detailWaveform',
     waveColor: '#BFBFBF',

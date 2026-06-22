@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Custodis — Plataforma de custodia y acceso a archivos bioacústicos</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -42,6 +41,19 @@
   .btn-lg{padding:12px 28px;font-size:15px;border-radius:var(--radius)}
   .btn-block{width:100%;justify-content:center}
   .hamburger{display:none;padding:8px}
+
+  .user-menu{position:relative}
+  .user-avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer;border:2px solid transparent;transition:.2s}
+  .user-avatar:hover{border-color:var(--primary)}
+  .user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:240px;padding:8px;display:none;z-index:200}
+  .user-dropdown.active{display:block}
+  .user-dropdown-header{padding:12px;border-bottom:1px solid var(--border-light);margin-bottom:4px}
+  .user-dropdown-header strong{display:block;font-size:14px}
+  .user-dropdown-header span{font-size:12px;color:var(--text-muted)}
+  .user-dropdown a,.user-dropdown button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:var(--radius-sm);font-size:14px;color:var(--text);text-align:left;transition:.15s}
+  .user-dropdown a:hover,.user-dropdown button:hover{background:var(--bg-alt)}
+  .user-dropdown .divider{height:1px;background:var(--border-light);margin:4px 0}
+  .user-dropdown .logout{color:#c0392b}
 
   main{flex:1}
   .view{display:none}
@@ -102,13 +114,11 @@
   .recording-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text-muted);margin-bottom:16px}
   .recording-meta span{display:flex;align-items:center;gap:4px}
   .waveform-row{display:flex;align-items:center;gap:16px}
-  .play-btn{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;border:none}
+  .play-btn{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;border:none;font-size:16px}
   .play-btn:hover{background:var(--primary-hover);transform:scale(1.05)}
   .waveform{flex:1;height:48px;display:flex;align-items:center;gap:2px;cursor:pointer;position:relative}
   .wave-bar{width:3px;background:var(--primary);border-radius:2px;opacity:.4;transition:.15s}
-  .wave-bar.played{opacity:1}
   .waveform:hover .wave-bar{opacity:.6}
-  .waveform:hover .wave-bar.played{opacity:1}
   .waveform.playing .wave-bar{animation:wavePulse 1s ease infinite alternate}
   @keyframes wavePulse{0%{opacity:.3}100%{opacity:1}}
 
@@ -163,6 +173,9 @@
   .form-group label{font-size:13px;font-weight:600}
   .form-group input,.form-group select,.form-group textarea{padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;transition:.2s}
   .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary)}
+  .form-group .error-msg{font-size:12px;color:#c0392b;margin-top:2px;display:none}
+  .form-group.has-error input{border-color:#c0392b}
+  .form-group.has-error .error-msg{display:block}
 
   .permission-options{display:flex;flex-direction:column;gap:10px}
   .perm-option{border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.2s;display:flex;gap:12px;align-items:flex-start}
@@ -189,11 +202,12 @@
   .perm-select{padding:10px 36px 10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:600;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;cursor:pointer;min-width:220px;transition:.2s}
   .perm-select:focus{outline:none;border-color:var(--primary)}
   .perm-desc{font-size:13px;color:var(--text-muted);margin-top:6px;max-width:280px}
+  .perm-saved{color:var(--secondary);font-size:13px;font-weight:600;display:none}
 
   .toast-container{position:fixed;top:80px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:8px}
   .toast{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:14px 20px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;font-size:14px;animation:slideIn .3s ease;min-width:280px}
   .toast.success{border-left:4px solid var(--secondary)}
-  .toast.error{border-left:4px solid #e74c3c}
+  .toast.error{border-left:4px solid #c0392b}
   .toast.info{border-left:4px solid var(--primary)}
   @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
@@ -214,7 +228,7 @@
 
   .file-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;padding:0 32px}
   .file-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-alt);border-radius:var(--radius-sm);font-size:14px;flex-wrap:wrap}
-  .file-item-icon{color:var(--primary)}
+  .file-item-icon{color:var(--primary);font-size:18px}
   .file-item-name{flex:1;font-weight:500;min-width:150px}
   .file-item-size{color:var(--text-muted);font-size:13px}
   .file-item-status{font-size:12px;font-weight:600;color:var(--secondary)}
@@ -223,6 +237,15 @@
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
   .empty-state h3{font-size:18px;margin-bottom:8px;color:var(--text)}
+
+  .admin-banner{background:linear-gradient(135deg,#2E75B6 0%,#3C8C5A 100%);color:#fff;padding:32px 24px;text-align:center}
+  .admin-banner h1{font-size:28px;font-weight:700;margin-bottom:8px}
+  .admin-banner p{font-size:15px;opacity:.9}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+  .stat-card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .stat-card .stat-value{font-size:28px;font-weight:700;color:var(--primary)}
+  .stat-card .stat-label{font-size:13px;color:var(--text-muted);margin-top:4px}
 
   @media(max-width:900px){
     .explorer-layout{grid-template-columns:1fr}
@@ -238,7 +261,7 @@
     .hamburger{display:block}
     .hero{padding:48px 20px 40px}
     .section{padding:40px 20px}
-    .nav-mobile{position:fixed;inset:0;background:#fff;z-index:150;padding:80px 24px 24px;display:none;flex-direction:column;gap:8px}
+    .nav-mobile{position:fixed;inset:0;background:#fff;z-index:150;padding:80px 24px 24px;display:none;flex-direction:column;gap:8px;overflow-y:auto}
     .nav-mobile.active{display:flex}
     .nav-mobile a{padding:14px;font-size:16px;border-bottom:1px solid var(--border-light);cursor:pointer}
     .nav-mobile-close{position:absolute;top:18px;right:18px;padding:8px}
@@ -260,14 +283,28 @@
       </div>
       Custodis
     </div>
-    <nav class="nav-links">
+    <nav class="nav-links" id="navLinks">
       <a data-nav="home" onclick="navigate('home')">Inicio</a>
       <a data-nav="explorer" onclick="navigate('explorer')">Explorar</a>
       <a data-nav="collections" onclick="navigate('collections')">Colecciones</a>
     </nav>
-    <div class="nav-actions">
-      <button class="btn btn-outline" onclick="openModal('login')">Iniciar sesión</button>
-      <button class="btn btn-primary" onclick="openModal('register')">Registrarse</button>
+    <div class="nav-actions" id="navActions">
+      <button class="btn btn-outline" id="btnLogin" onclick="openModal('login')">Iniciar sesión</button>
+      <button class="btn btn-primary" id="btnRegister" onclick="openModal('register')">Registrarse</button>
+      <div class="user-menu" id="userMenu" style="display:none">
+        <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">DV</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-header">
+            <strong id="userName">Dr. Valenzuela</strong>
+            <span id="userEmail">valenzuela@uach.cl</span>
+          </div>
+          <a onclick="navigate('upload');closeUserMenu()"> Cargar archivos</a>
+          <a onclick="navigate('permissions');closeUserMenu()">🔐 Gestión de permisos</a>
+          <a onclick="navigate('activity');closeUserMenu()">📊 Actividad</a>
+          <div class="divider"></div>
+          <button class="logout" onclick="logout()">Cerrar sesión</button>
+        </div>
+      </div>
       <button class="hamburger" onclick="toggleMobileNav()">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
@@ -282,8 +319,9 @@
   <a onclick="navigate('home');toggleMobileNav()">Inicio</a>
   <a onclick="navigate('explorer');toggleMobileNav()">Explorar</a>
   <a onclick="navigate('collections');toggleMobileNav()">Colecciones</a>
-  <a onclick="navigate('upload');toggleMobileNav()">Cargar archivos</a>
-  <a onclick="navigate('permissions');toggleMobileNav()">Gestión de permisos</a>
+  <a onclick="navigate('upload');toggleMobileNav()">📤 Cargar archivos</a>
+  <a onclick="navigate('permissions');toggleMobileNav()">🔐 Gestión de permisos</a>
+  <a onclick="navigate('activity');toggleMobileNav()">📊 Actividad</a>
   <a onclick="openModal('login');toggleMobileNav()">Iniciar sesión</a>
 </div>
 
@@ -298,13 +336,13 @@
     <p>Accede a tu cuenta para descargar archivos y gestionar proyectos.</p>
     <div class="form-group">
       <label>Correo electrónico</label>
-      <input type="email" placeholder="tu@correo.cl">
+      <input type="email" id="loginEmail" placeholder="tu@correo.cl" value="valenzuela@uach.cl">
     </div>
     <div class="form-group">
       <label>Contraseña</label>
-      <input type="password" placeholder="••••••••">
+      <input type="password" placeholder="••••••••" value="password">
     </div>
-    <button class="btn btn-primary btn-block btn-lg" onclick="closeModal('login');showToast('Sesión iniciada correctamente','success')">Entrar</button>
+    <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
@@ -349,21 +387,21 @@
         <h2 class="section-title">Explora por Categorías</h2>
         <div class="cat-grid">
           <div class="cat-card" onclick="navigate('explorer')">
-            <div class="cat-card-img" style="background-image:url('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=600&q=80')"></div>
+            <div class="cat-card-img" style="background:linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)"></div>
             <div class="cat-card-body">
               <h3>Aves Endémicas</h3>
               <p>128 grabaciones disponibles</p>
             </div>
           </div>
           <div class="cat-card" onclick="navigate('explorer')">
-            <div class="cat-card-img" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80')"></div>
+            <div class="cat-card-img" style="background:linear-gradient(135deg,#5b8fb9 0%,#2e5f8f 100%)"></div>
             <div class="cat-card-body">
               <h3>Humedales de los ríos</h3>
               <p>42 grabaciones disponibles</p>
             </div>
           </div>
           <div class="cat-card" onclick="navigate('explorer')">
-            <div class="cat-card-img" style="background-image:url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=600&q=80')"></div>
+            <div class="cat-card-img" style="background:linear-gradient(135deg,#e8b23a 0%,#c49520 100%)"></div>
             <div class="cat-card-body">
               <h3>Mapa de grabaciones</h3>
               <p>Exploración geográfica interactiva</p>
@@ -378,7 +416,7 @@
         <h2 class="section-title">Colecciones Destacadas</h2>
         <div class="col-grid">
           <div class="col-card" onclick="navigate('collections')">
-            <div class="col-card-img" style="background-image:url('https://images.unsplash.com/photo-1470093851219-69951fcbb533?w=400&q=80')"></div>
+            <div class="col-card-img" style="background:linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)"></div>
             <div class="col-card-body">
               <h4>Monitoreo Humedal Carlos Anwandter</h4>
               <p>Proyecto UACh 2024 · 15 Archivos</p>
@@ -386,7 +424,7 @@
             </div>
           </div>
           <div class="col-card" onclick="navigate('collections')">
-            <div class="col-card-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80')"></div>
+            <div class="col-card-img" style="background:linear-gradient(135deg,#2e5f8f 0%,#1a3d5c 100%)"></div>
             <div class="col-card-body">
               <h4>Bosque Nativo Valdiviano</h4>
               <p>Proyecto UACh 2023 · 28 Archivos</p>
@@ -415,9 +453,9 @@
         <div class="filter-group">
           <label>Ecosistema</label>
           <div class="checkbox-group">
-            <label><input type="checkbox" value="humedal" checked> Humedal</label>
-            <label><input type="checkbox" value="bosque"> Bosque Nativo</label>
-            <label><input type="checkbox" value="costa"> Costa</label>
+            <label><input type="checkbox" value="Humedal" checked> Humedal</label>
+            <label><input type="checkbox" value="Bosque Nativo"> Bosque Nativo</label>
+            <label><input type="checkbox" value="Costa"> Costa</label>
           </div>
         </div>
         <div class="filter-group">
@@ -454,7 +492,7 @@
   <div class="view" id="view-detail">
     <div class="detail-layout">
       <div class="detail-card">
-        <div class="detail-hero" id="detailHero" style="background-image:url('https://images.unsplash.com/photo-1470093851219-69951fcbb533?w=1200&q=80')">
+        <div class="detail-hero" id="detailHero" style="background:linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)">
           <div class="detail-hero-overlay"></div>
         </div>
         <div class="detail-body">
@@ -464,9 +502,7 @@
           <div class="detail-player">
             <div class="detail-waveform" id="detailWaveform"></div>
             <div class="player-controls">
-              <button class="play-btn" id="detailPlayBtn" onclick="toggleDetailPlay()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none" id="detailPlayIcon"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-              </button>
+              <button class="play-btn" id="detailPlayBtn" onclick="toggleDetailPlay()">▶</button>
               <span class="player-time" id="detailTimeCurrent">0:00</span>
               <div class="player-progress" onclick="seekDetail(event)">
                 <div class="player-progress-fill" id="detailProgressFill"></div>
@@ -485,8 +521,12 @@
             </div>
             <div class="meta-section">
               <h4>Ubicación geográfica</h4>
-              <div class="map-container">
-                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80" alt="Mapa de ubicación">
+              <div class="map-container" style="background:linear-gradient(135deg,#c8e6c9 0%,#a5d6a7 100%);display:flex;align-items:center;justify-content:center">
+                <div style="text-align:center;color:#2e5f8f">
+                  <div style="font-size:48px;margin-bottom:8px">️</div>
+                  <div style="font-size:14px;font-weight:600">Humedal Carlos Anwandter</div>
+                  <div style="font-size:12px">Valdivia, Los Ríos</div>
+                </div>
                 <div class="map-pin"></div>
               </div>
               <p style="font-size:13px;color:var(--text-muted);margin-top:8px" id="detailLocation">Humedal Carlos Anwandter, Valdivia, Región de Los Ríos, Chile</p>
@@ -495,12 +535,10 @@
 
           <div class="detail-actions">
             <button class="btn btn-primary btn-lg" onclick="handleDownload()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-              Descargar WAV · <span id="detailSize">42.2 MB</span>
+              ⬇ Descargar WAV · <span id="detailSize">42.2 MB</span>
             </button>
             <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-              Compartir
+              ↗ Compartir
             </button>
             <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
           </div>
@@ -511,6 +549,10 @@
 
   <!-- UPLOAD -->
   <div class="view" id="view-upload">
+    <div class="admin-banner">
+      <h1>📤 Cargar archivos</h1>
+      <p>Sube nuevas grabaciones bioacústicas y completa sus metadatos para publicarlas en la plataforma.</p>
+    </div>
     <div class="upload-layout">
       <div class="upload-card">
         <div class="drop-zone" id="dropZone">
@@ -527,19 +569,21 @@
         <div class="upload-section">
           <h3>Metadatos obligatorios</h3>
           <div class="form-row">
-            <div class="form-group full">
-              <label>Título de la grabación</label>
+            <div class="form-group full" id="fg-title">
+              <label>Título de la grabación *</label>
               <input type="text" id="uploadTitle" placeholder="Ej: Amanecer en Humedal – Traro">
+              <span class="error-msg">Falta el título de la grabación. Complétalo para poder publicar.</span>
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group" id="fg-species">
               <label>Especie (si se conoce)</label>
               <input type="text" id="uploadSpecies" placeholder="Ej: Traro">
             </div>
-            <div class="form-group">
-              <label>Fecha de captura</label>
+            <div class="form-group" id="fg-date">
+              <label>Fecha de captura *</label>
               <input type="date" id="uploadDate">
+              <span class="error-msg">Falta la fecha de captura. Complétala para poder publicar.</span>
             </div>
           </div>
           <div class="form-row">
@@ -550,6 +594,18 @@
             <div class="form-group">
               <label>Dispositivo de captura</label>
               <input type="text" id="uploadDevice" placeholder="Ej: Song Meter SM4">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label>Proyecto asociado</label>
+              <select id="uploadProject">
+                <option value="">Selecciona un proyecto...</option>
+                <option>Monitoreo Humedal Carlos Anwandter</option>
+                <option>Bosque Nativo Valdiviano</option>
+                <option>Anfibios del Sur</option>
+                <option>Costa Patagónica</option>
+              </select>
             </div>
           </div>
         </div>
@@ -565,10 +621,17 @@
               </div>
             </label>
             <label class="perm-option" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="registrado">
+              <div>
+                <strong>Usuarios Registrados</strong>
+                <span>Usuarios con cuenta pueden escuchar y descargar en MP3.</span>
+              </div>
+            </label>
+            <label class="perm-option" onclick="selectPerm(this)">
               <input type="radio" name="uploadPerm" value="investigador">
               <div>
                 <strong>Investigadores Registrados</strong>
-                <span>Requiere inicio de sesión para descargar en alta calidad.</span>
+                <span>Requiere inicio de sesión para descargar en alta calidad (WAV/FLAC).</span>
               </div>
             </label>
             <label class="perm-option" onclick="selectPerm(this)">
@@ -584,8 +647,7 @@
         <div class="upload-actions">
           <button class="btn btn-outline btn-lg" onclick="resetUpload()">Cancelar</button>
           <button class="btn btn-primary btn-lg" onclick="publishRecording()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Publicar grabación
+            ✓ Publicar grabación
           </button>
         </div>
       </div>
@@ -594,18 +656,40 @@
 
   <!-- PERMISSIONS -->
   <div class="view" id="view-permissions">
+    <div class="admin-banner">
+      <h1> Gestión de permisos</h1>
+      <p>Controla quién puede escuchar y descargar tus proyectos. Los cambios se aplican inmediatamente.</p>
+    </div>
     <div class="perm-layout">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">4</div>
+          <div class="stat-label">Proyectos activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statPublic">2</div>
+          <div class="stat-label">Acceso público</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statRestricted">1</div>
+          <div class="stat-label">Solo investigadores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statAdmin">1</div>
+          <div class="stat-label">Solo administrador</div>
+        </div>
+      </div>
+
       <div class="perm-header">
         <div class="perm-header-left">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <div>
-            <h2>Gestión de permisos</h2>
-            <p>Controla quién puede acceder a tus proyectos</p>
+            <h2>Tus proyectos</h2>
+            <p>Selecciona el nivel de acceso para cada grabación o proyecto</p>
           </div>
         </div>
         <button class="btn btn-primary btn-lg" onclick="showToast('Nuevo proyecto creado','success')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-          Nuevo proyecto
+          ＋ Nuevo proyecto
         </button>
       </div>
 
@@ -620,6 +704,82 @@
             </tr>
           </thead>
           <tbody id="permTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="view" id="view-activity">
+    <div class="admin-banner">
+      <h1>📊 Panel de actividad</h1>
+      <p>Visualiza descargas, accesos y solicitudes sobre tus archivos.</p>
+    </div>
+    <div class="perm-layout">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">128</div>
+          <div class="stat-label">Descargas totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">342</div>
+          <div class="stat-label">Reproducciones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Solicitudes pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Usuarios activos hoy</div>
+        </div>
+      </div>
+
+      <div class="perm-header">
+        <div class="perm-header-left">
+          <div>
+            <h2>Actividad reciente</h2>
+            <p>Últimas acciones sobre tus archivos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="perm-table-wrap">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Archivo</th>
+              <th>Acción</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Valentina Torres</strong><br><span style="font-size:12px;color:var(--text-muted)">valentina@artista.cl</span></td>
+              <td>Amanecer en Humedal – Traro</td>
+              <td><span style="background:var(--secondary);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Descarga FLAC</span></td>
+              <td>Hace 2 horas</td>
+            </tr>
+            <tr>
+              <td><strong>Carlos Méndez</strong><br><span style="font-size:12px;color:var(--text-muted)">cmendez@uach.cl</span></td>
+              <td>Canto matutino – Hued-Hued</td>
+              <td><span style="background:var(--primary);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Descarga WAV</span></td>
+              <td>Hace 5 horas</td>
+            </tr>
+            <tr>
+              <td><strong>Visitante anónimo</strong></td>
+              <td>Noche en el humedal – Ranas</td>
+              <td><span style="background:var(--text-muted);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Reproducción</span></td>
+              <td>Hace 1 día</td>
+            </tr>
+            <tr>
+              <td><strong>María López</strong><br><span style="font-size:12px;color:var(--text-muted)">mlopez@investigador.cl</span></td>
+              <td>Bosque lluvioso – Chucao</td>
+              <td><span style="background:var(--warning);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Solicitud acceso</span></td>
+              <td>Hace 2 días</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -654,21 +814,20 @@
 </footer>
 
 <script>
-// DATA
 const recordings = [
-  {id:1,title:'Amanecer en Humedal – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-12',duration:'4:30',files:15,size:'42.2MB',format:'WAV',coords:'-39.8196, -73.2452',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos'},
-  {id:2,title:'Canto matutino – Hued-Hued',region:'Los Ríos',ecosystem:'Bosque Nativo',species:'Hued-Hued',date:'2026-09-28',duration:'3:15',files:8,size:'28.4MB',format:'WAV',coords:'-39.7500, -73.1800',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Valdivia, Los Ríos'},
-  {id:3,title:'Noche en el humedal – Ranas',region:'Los Lagos',ecosystem:'Humedal',species:'Rana de Darwin',date:'2026-10-05',duration:'6:20',files:22,size:'55.1MB',format:'FLAC',coords:'-40.1200, -73.3500',device:'Song Meter SM4',project:'Anfibios del Sur',location:'Puerto Montt, Los Lagos'},
-  {id:4,title:'Vientos costeros – Gaviotas',region:'Los Lagos',ecosystem:'Costa',species:'Gaviota dominicana',date:'2026-08-15',duration:'2:45',files:5,size:'18.7MB',format:'WAV',coords:'-41.2000, -73.0500',device:'Zoom H6',project:'Costa Patagónica',location:'Puerto Montt, Los Lagos'},
-  {id:5,title:'Bosque lluvioso – Chucao',region:'Araucanía',ecosystem:'Bosque Nativo',species:'Chucao',date:'2026-10-01',duration:'5:10',files:12,size:'38.9MB',format:'WAV',coords:'-38.9500, -72.1200',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Temuco, Araucanía'},
-  {id:6,title:'Amanecer ribereño – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-10',duration:'4:00',files:10,size:'35.2MB',format:'FLAC',coords:'-39.8300, -73.2100',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos'},
+  {id:1,title:'Amanecer en Humedal – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-12',duration:'4:30',files:15,size:'42.2MB',format:'WAV',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos'},
+  {id:2,title:'Canto matutino – Hued-Hued',region:'Los Ríos',ecosystem:'Bosque Nativo',species:'Hued-Hued',date:'2026-09-28',duration:'3:15',files:8,size:'28.4MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Valdivia, Los Ríos'},
+  {id:3,title:'Noche en el humedal – Ranas',region:'Los Lagos',ecosystem:'Humedal',species:'Rana de Darwin',date:'2026-10-05',duration:'6:20',files:22,size:'55.1MB',format:'FLAC',device:'Song Meter SM4',project:'Anfibios del Sur',location:'Puerto Montt, Los Lagos'},
+  {id:4,title:'Vientos costeros – Gaviotas',region:'Los Lagos',ecosystem:'Costa',species:'Gaviota dominicana',date:'2026-08-15',duration:'2:45',files:5,size:'18.7MB',format:'WAV',device:'Zoom H6',project:'Costa Patagónica',location:'Puerto Montt, Los Lagos'},
+  {id:5,title:'Bosque lluvioso – Chucao',region:'Araucanía',ecosystem:'Bosque Nativo',species:'Chucao',date:'2026-10-01',duration:'5:10',files:12,size:'38.9MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Temuco, Araucanía'},
+  {id:6,title:'Amanecer ribereño – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-10',duration:'4:00',files:10,size:'35.2MB',format:'FLAC',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos'},
 ];
 
 const collections = [
-  {name:'Monitoreo Humedal Carlos Anwandter',project:'Proyecto UACh 2024',files:15,img:'https://images.unsplash.com/photo-1470093851219-69951fcbb533?w=400&q=80'},
-  {name:'Bosque Nativo Valdiviano',project:'Proyecto UACh 2023',files:28,img:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80'},
-  {name:'Anfibios del Sur de Chile',project:'Proyecto UACh 2025',files:12,img:'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80'},
-  {name:'Costa Patagónica',project:'Proyecto UACh 2024',files:8,img:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80'},
+  {name:'Monitoreo Humedal Carlos Anwandter',project:'Proyecto UACh 2024',files:15,color:'linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)'},
+  {name:'Bosque Nativo Valdiviano',project:'Proyecto UACh 2023',files:28,color:'linear-gradient(135deg,#2e5f8f 0%,#1a3d5c 100%)'},
+  {name:'Anfibios del Sur de Chile',project:'Proyecto UACh 2025',files:12,color:'linear-gradient(135deg,#e8b23a 0%,#c49520 100%)'},
+  {name:'Costa Patagónica',project:'Proyecto UACh 2024',files:8,color:'linear-gradient(135deg,#5b8fb9 0%,#2e5f8f 100%)'},
 ];
 
 const permProjects = [
@@ -682,27 +841,30 @@ let detailPlaying = false;
 let detailProgress = 0;
 let detailInterval = null;
 let uploadedFiles = [];
+let isLoggedIn = false;
 
 function navigate(view, data) {
+  // Check auth for admin views
+  if ((view === 'upload' || view === 'permissions' || view === 'activity') && !isLoggedIn) {
+    showToast('Debes iniciar sesión para acceder a esta sección', 'info');
+    openModal('login');
+    return;
+  }
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = document.getElementById('view-' + view);
-  if (target) {
-    target.classList.add('active');
-  }
+  if (target) target.classList.add('active');
+
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   const navLink = document.querySelector('.nav-links a[data-nav="' + view + '"]');
   if (navLink) navLink.classList.add('active');
+
   window.scrollTo(0, 0);
 
-  if (view === 'explorer') {
-    renderRecordings();
-  } else if (view === 'detail' && data) {
-    loadDetail(data);
-  } else if (view === 'permissions') {
-    renderPermissions();
-  } else if (view === 'collections') {
-    renderCollections();
-  }
+  if (view === 'explorer') renderRecordings();
+  else if (view === 'detail' && data) loadDetail(data);
+  else if (view === 'permissions') renderPermissions();
+  else if (view === 'collections') renderCollections();
 }
 
 function generateWaveform(count, containerId) {
@@ -722,7 +884,7 @@ function renderRecordings(filteredList) {
   const list = filteredList || recordings;
   const container = document.getElementById('resultsList');
   if (!container) return;
-  
+
   document.getElementById('resultsCount').textContent = list.length + ' resultado' + (list.length !== 1 ? 's' : '') + ' encontrado' + (list.length !== 1 ? 's' : '');
 
   if (list.length === 0) {
@@ -741,8 +903,8 @@ function renderRecordings(filteredList) {
       <div class="recording-meta">
         <span>📍 ${r.location}</span>
         <span>📁 ${r.files} Archivos</span>
-        <span>📅 ${formatDate(r.date)}</span>
-        <span> ${r.duration}</span>
+        <span> ${formatDate(r.date)}</span>
+        <span>🕐 ${r.duration}</span>
       </div>
       <div class="waveform-row" onclick="event.stopPropagation();togglePlay(${r.id},'${wfId}')">
         <button class="play-btn" id="playBtn${r.id}">▶</button>
@@ -752,10 +914,7 @@ function renderRecordings(filteredList) {
     `;
   }).join('');
 
-  // Generate waveforms after DOM update
-  list.forEach(r => {
-    generateWaveform(80, 'wf_' + r.id);
-  });
+  list.forEach(r => generateWaveform(80, 'wf_' + r.id));
 }
 
 function formatDate(d) {
@@ -768,13 +927,12 @@ function togglePlay(id, wfId) {
   const btn = document.getElementById('playBtn' + id);
   const waveform = document.getElementById(wfId);
   if (!btn || !waveform) return;
-  
-  const isPlaying = btn.textContent.trim() === '';
-  
-  // Stop all others
+
+  const isPlaying = btn.textContent.trim() === '⏸';
+
   document.querySelectorAll('.play-btn').forEach(b => b.textContent = '▶');
   document.querySelectorAll('.waveform').forEach(w => w.classList.remove('playing'));
-  
+
   if (!isPlaying) {
     btn.textContent = '⏸';
     waveform.classList.add('playing');
@@ -787,53 +945,41 @@ function loadDetail(id) {
   document.getElementById('detailTitle').textContent = r.title;
   document.getElementById('detailSize').textContent = r.size;
   document.getElementById('detailLocation').textContent = r.location + ', Chile';
-  
+
   document.getElementById('detailSubtitle').innerHTML = `
     <span>📍 ${r.location}</span>
     <span>📁 ${r.files} Archivos</span>
     <span>📅 ${formatDate(r.date)}</span>
     <span>🕐 ${r.duration}</span>
   `;
-  
+
   document.getElementById('detailMetaList').innerHTML = `
-    <div class="meta-item">
-      <span class="meta-label">Especie</span>
-      <span class="meta-value">${r.species}</span>
-    </div>
-    <div class="meta-item">
-      <span class="meta-label">Fecha de captura</span>
-      <span class="meta-value">${formatDate(r.date)} — 06:15 AM</span>
-    </div>
-    <div class="meta-item">
-      <span class="meta-label">Dispositivo</span>
-      <span class="meta-value">${r.device}</span>
-    </div>
-    <div class="meta-item">
-      <span class="meta-label">Proyecto</span>
-      <span class="meta-value">${r.project}</span>
-    </div>
+    <div class="meta-item"><span class="meta-label">Especie</span><span class="meta-value">${r.species}</span></div>
+    <div class="meta-item"><span class="meta-label">Fecha de captura</span><span class="meta-value">${formatDate(r.date)} — 06:15 AM</span></div>
+    <div class="meta-item"><span class="meta-label">Dispositivo</span><span class="meta-value">${r.device}</span></div>
+    <div class="meta-item"><span class="meta-label">Proyecto</span><span class="meta-value">${r.project}</span></div>
   `;
-  
+
   detailProgress = 0;
   detailPlaying = false;
   document.getElementById('detailProgressFill').style.width = '0%';
   document.getElementById('detailTimeCurrent').textContent = '0:00';
-  document.getElementById('detailPlayIcon').innerHTML = '<polygon points="6 3 20 12 6 21 6 3"/>';
-  
+  document.getElementById('detailPlayBtn').textContent = '▶';
+
   generateWaveform(120, 'detailWaveform');
 }
 
 function toggleDetailPlay() {
   detailPlaying = !detailPlaying;
-  const icon = document.getElementById('detailPlayIcon');
+  const btn = document.getElementById('detailPlayBtn');
   if (detailPlaying) {
-    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    btn.textContent = '⏸';
     detailInterval = setInterval(() => {
       detailProgress += 0.5;
       if (detailProgress >= 100) {
         detailProgress = 0;
         detailPlaying = false;
-        icon.innerHTML = '<polygon points="6 3 20 12 6 21 6 3"/>';
+        btn.textContent = '▶';
         clearInterval(detailInterval);
       }
       document.getElementById('detailProgressFill').style.width = detailProgress + '%';
@@ -842,7 +988,7 @@ function toggleDetailPlay() {
       document.getElementById('detailTimeCurrent').textContent = Math.floor(curSec/60) + ':' + String(curSec%60).padStart(2,'0');
     }, 100);
   } else {
-    icon.innerHTML = '<polygon points="6 3 20 12 6 21 6 3"/>';
+    btn.textContent = '▶';
     clearInterval(detailInterval);
   }
 }
@@ -854,26 +1000,26 @@ function seekDetail(e) {
 }
 
 function handleDownload() {
-  showToast('Inicia sesión para descargar este archivo', 'info');
-  setTimeout(() => openModal('login'), 800);
+  if (!isLoggedIn) {
+    showToast('Inicia sesión para descargar este archivo', 'info');
+    setTimeout(() => openModal('login'), 800);
+  } else {
+    showToast('Descarga iniciada. El archivo se guardará en tu dispositivo.', 'success');
+  }
 }
 
 function applyFilters() {
   const region = document.getElementById('filterRegion').value;
   const species = document.getElementById('filterSpecies').value.toLowerCase();
   const ecosistemas = Array.from(document.querySelectorAll('.checkbox-group input:checked')).map(cb => cb.value);
-  
+
   let filtered = recordings.filter(r => {
     if (region && r.region !== region) return false;
     if (species && !r.species.toLowerCase().includes(species) && !r.title.toLowerCase().includes(species)) return false;
-    if (ecosistemas.length > 0 && !ecosistemas.includes(r.ecosystem.toLowerCase().replace(' ', ''))) {
-      // Check if ecosystem matches
-      const ecoMatch = ecosistemas.some(e => r.ecosystem.toLowerCase().includes(e));
-      if (!ecoMatch) return false;
-    }
+    if (ecosistemas.length > 0 && !ecosistemas.includes(r.ecosystem)) return false;
     return true;
   });
-  
+
   renderRecordings(filtered);
   showToast(filtered.length + ' resultado' + (filtered.length !== 1 ? 's' : '') + ' encontrado' + (filtered.length !== 1 ? 's' : ''), 'info');
 }
@@ -884,8 +1030,8 @@ if (dropZone) {
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
   dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-  dropZone.addEventListener('click', e => { 
-    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+  dropZone.addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && !e.target.closest('button')) {
       document.getElementById('fileInput').click();
     }
   });
@@ -895,6 +1041,11 @@ function handleFiles(files) {
   const list = document.getElementById('fileList');
   if (!list) return;
   Array.from(files).forEach((file, idx) => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['wav','flac','mp3'].includes(ext)) {
+      showToast('Ese formato no es compatible. Sube archivos WAV, FLAC o MP3.', 'error');
+      return;
+    }
     const id = 'file_' + Date.now() + '_' + idx;
     uploadedFiles.push({id, name: file.name, size: (file.size / 1024 / 1024).toFixed(1)});
     const item = document.createElement('div');
@@ -937,13 +1088,35 @@ function selectPerm(el) {
 }
 
 function publishRecording() {
-  const title = document.getElementById('uploadTitle').value;
+  const title = document.getElementById('uploadTitle').value.trim();
   const date = document.getElementById('uploadDate').value;
-  if (!title) { showToast('Falta el título de la grabación. Complétalo para poder publicar.', 'error'); return; }
-  if (!date) { showToast('Falta la fecha de captura. Complétala para poder publicar.', 'error'); return; }
-  if (uploadedFiles.length === 0) { showToast('Selecciona al menos un archivo de audio.', 'error'); return; }
+
+  // Clear errors
+  document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
+
+  let hasError = false;
+  if (!title) {
+    document.getElementById('fg-title').classList.add('has-error');
+    hasError = true;
+  }
+  if (!date) {
+    document.getElementById('fg-date').classList.add('has-error');
+    hasError = true;
+  }
+  if (uploadedFiles.length === 0) {
+    showToast('Selecciona al menos un archivo de audio.', 'error');
+    return;
+  }
+  if (hasError) {
+    showToast('Faltan campos obligatorios. Revisa el formulario.', 'error');
+    return;
+  }
+
   showToast('Grabación publicada correctamente.', 'success');
-  setTimeout(() => navigate('explorer'), 1200);
+  setTimeout(() => {
+    resetUpload();
+    navigate('explorer');
+  }, 1500);
 }
 
 function resetUpload() {
@@ -952,14 +1125,24 @@ function resetUpload() {
   document.getElementById('uploadDate').value = '';
   document.getElementById('uploadCoords').value = '';
   document.getElementById('uploadDevice').value = '';
+  document.getElementById('uploadProject').value = '';
   document.getElementById('fileList').innerHTML = '';
+  document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
   uploadedFiles = [];
   showToast('Formulario reiniciado', 'info');
 }
 
+// PERMISSIONS
 function renderPermissions() {
   const tbody = document.getElementById('permTableBody');
   if (!tbody) return;
+
+  // Update stats
+  document.getElementById('statTotal').textContent = permProjects.length;
+  document.getElementById('statPublic').textContent = permProjects.filter(p => p.level === 'public').length;
+  document.getElementById('statRestricted').textContent = permProjects.filter(p => p.level === 'investigador' || p.level === 'registrado').length;
+  document.getElementById('statAdmin').textContent = permProjects.filter(p => p.level === 'admin').length;
+
   tbody.innerHTML = permProjects.map((p, idx) => `
     <tr>
       <td>
@@ -968,7 +1151,7 @@ function renderPermissions() {
       </td>
       <td>${p.files} archivos</td>
       <td>
-        <select class="perm-select" onchange="updatePermDesc(${p.id}, this.value)">
+        <select class="perm-select" id="permSelect${p.id}" onchange="updatePermDesc(${p.id}, this.value)">
           <option value="public" ${p.level==='public'?'selected':''}>Público</option>
           <option value="registrado" ${p.level==='registrado'?'selected':''}>Usuarios Registrados</option>
           <option value="investigador" ${p.level==='investigador'?'selected':''}>Investigadores Registrados</option>
@@ -976,7 +1159,10 @@ function renderPermissions() {
         </select>
         <div class="perm-desc" id="permDesc${p.id}">${p.desc}</div>
       </td>
-      <td><button class="btn btn-ghost" onclick="savePerm(${p.id})">Guardar cambios</button></td>
+      <td>
+        <button class="btn btn-ghost" onclick="savePerm(${p.id})">Guardar cambios</button>
+        <div class="perm-saved" id="permSaved${p.id}">✓ Guardado</div>
+      </td>
     </tr>
   `).join('');
 }
@@ -991,15 +1177,20 @@ const permDescriptions = {
 function updatePermDesc(id, level) {
   const el = document.getElementById('permDesc' + id);
   if (el) el.textContent = permDescriptions[level] || '';
+  // Hide saved indicator when changed
+  const saved = document.getElementById('permSaved' + id);
+  if (saved) saved.style.display = 'none';
 }
 
 function savePerm(id) {
   const proj = permProjects.find(p => p.id === id);
-  const select = document.querySelector(`#permTableBody tr:nth-child(${permProjects.indexOf(proj)+1}) .perm-select`);
+  const select = document.getElementById('permSelect' + id);
   const level = select.value;
   proj.level = level;
   const label = level === 'public' ? 'todos los visitantes' : level === 'registrado' ? 'usuarios registrados' : level === 'investigador' ? 'investigadores registrados' : 'el administrador';
   showToast('Listo. Ahora este proyecto está disponible para ' + label + '.', 'success');
+  const saved = document.getElementById('permSaved' + id);
+  if (saved) saved.style.display = 'block';
 }
 
 function renderCollections() {
@@ -1007,7 +1198,7 @@ function renderCollections() {
   if (!container) return;
   container.innerHTML = collections.map(c => `
     <div class="col-card" onclick="navigate('explorer')">
-      <div class="col-card-img" style="background-image:url('${c.img}')"></div>
+      <div class="col-card-img" style="background:${c.color}"></div>
       <div class="col-card-body">
         <h4>${c.name}</h4>
         <p>${c.project} · ${c.files} Archivos</p>
@@ -1017,6 +1208,54 @@ function renderCollections() {
   `).join('');
 }
 
+// AUTH
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  if (!email) {
+    showToast('Ingresa tu correo electrónico', 'error');
+    return;
+  }
+  isLoggedIn = true;
+  closeModal('login');
+  updateAuthUI();
+  showToast('Sesión iniciada correctamente. Bienvenido, Dr. Valenzuela.', 'success');
+}
+
+function logout() {
+  isLoggedIn = false;
+  closeUserMenu();
+  updateAuthUI();
+  navigate('home');
+  showToast('Sesión cerrada correctamente', 'info');
+}
+
+function updateAuthUI() {
+  const btnLogin = document.getElementById('btnLogin');
+  const btnRegister = document.getElementById('btnRegister');
+  const userMenu = document.getElementById('userMenu');
+
+  if (isLoggedIn) {
+    btnLogin.style.display = 'none';
+    btnRegister.style.display = 'none';
+    userMenu.style.display = 'block';
+  } else {
+    btnLogin.style.display = 'inline-flex';
+    btnRegister.style.display = 'inline-flex';
+    userMenu.style.display = 'none';
+  }
+}
+
+function toggleUserMenu() {
+  document.getElementById('userDropdown').classList.toggle('active');
+}
+function closeUserMenu() {
+  document.getElementById('userDropdown').classList.remove('active');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) closeUserMenu();
+});
+
+// MODALS
 function openModal(name) {
   document.getElementById(name + 'Modal').classList.add('active');
 }
@@ -1027,11 +1266,12 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
 });
 
+// TOAST
 function showToast(msg, type) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
   toast.className = 'toast ' + (type || 'info');
-  const icons = {success:'✓',error:'✕',info:''};
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
   toast.innerHTML = `<span style="font-weight:700;font-size:16px">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
   container.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; toast.style.transition = '.3s'; setTimeout(() => toast.remove(), 300); }, 3500);
@@ -1041,7 +1281,7 @@ function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('active');
 }
 
-// Initialize
+// INIT
 document.addEventListener('DOMContentLoaded', () => {
   renderRecordings();
 });
