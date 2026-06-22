@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custodis — Plataforma de custodia y acceso a archivos bioacústicos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@7"></script>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="navigate('home')">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+      </div>
+      Custodis
+    </div>
+    <nav class="nav-links">
+      <a data-nav="home" onclick="navigate('home')">Inicio</a>
+      <a data-nav="explorer" onclick="navigate('explorer')">Explorar</a>
+      <a data-nav="collections" onclick="navigate('collections')">Colecciones</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn btn-outline" onclick="openModal('login')">Iniciar sesión</button>
+      <button class="btn btn-primary" onclick="openModal('register')">Registrarse</button>
+      <button class="hamburger" onclick="toggleMobileNav()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="nav-mobile" id="mobileNav">
+  <button class="nav-mobile-close" onclick="toggleMobileNav()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+  <a onclick="navigate('home');toggleMobileNav()">Inicio</a>
+  <a onclick="navigate('explorer');toggleMobileNav()">Explorar</a>
+  <a onclick="navigate('collections');toggleMobileNav()">Colecciones</a>
+  <a onclick="navigate('upload');toggleMobileNav()">Cargar archivos</a>
+  <a onclick="navigate('permissions');toggleMobileNav()">Gestión de permisos</a>
+  <a onclick="openModal('login');toggleMobileNav()">Iniciar sesión</a>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <h2>Iniciar sesión</h2>
+    <p>Accede a tu cuenta para descargar archivos y gestionar proyectos.</p>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" placeholder="tu@correo.cl">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="closeModal('login');showToast('Sesión iniciada correctamente','success')">Entrar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('register')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <h2>Crear cuenta</h2>
+    <p>Regístrate para descargar archivos en alta calidad y acceder a colecciones completas.</p>
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input type="text" placeholder="Tu nombre">
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" placeholder="tu@correo.cl">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" placeholder="Mínimo 8 caracteres">
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="closeModal('register');showToast('Cuenta creada exitosamente','success')">Registrarse</button>
+  </div>
+</div>
+
+<main>
+  <div class="view active" id="view-home">
+    <section class="hero">
+      <h1>Custodia y acceso a archivos bioacústicos</h1>
+      <p>Explora y escucha grabaciones de naturaleza y humedales del sur de Chile. Explora y escucha sin crear una cuenta.</p>
+      <div class="search-bar">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Busca por especie, lugar o ecosistema..." id="homeSearch" onkeydown="if(event.key==='Enter')navigate('explorer')">
+        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Explora por Categorías</h2>
+        <div class="cat-grid">
+          <div class="cat-card" onclick="navigate('explorer')">
+            <div class="cat-card-img" style="background-image:url('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=600&q=80')"></div>
+            <div class="cat-card-body">
+              <h3>Aves Endémicas</h3>
+              <p>128 grabaciones disponibles</p>
+            </div>
+          </div>
+          <div class="cat-card" onclick="navigate('explorer')">
+            <div class="cat-card-img" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80')"></div>
+            <div class="cat-card-body">
+              <h3>Humedales de los ríos</h3>
+              <p>42 grabaciones disponibles</p>
+            </div>
+          </div>
+          <div class="cat-card" onclick="navigate('explorer')">
+            <div class="cat-card-img" style="background-image:url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=600&q=80')"></div>
+            <div class="cat-card-body">
+              <h3>Mapa de grabaciones</h3>
+              <p>Exploración geográfica interactiva</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="background:var(--bg-alt)">
+      <div class="section-inner">
+        <h2 class="section-title">Colecciones Destacadas</h2>
+        <div class="col-grid">
+          <div class="col-card" onclick="navigate('collections')">
+            <div class="col-card-img" style="background-image:url('https://images.unsplash.com/photo-1470093851219-69951fcbb533?w=400&q=80')"></div>
+            <div class="col-card-body">
+              <h4>Monitoreo Humedal Carlos Anwandter</h4>
+              <p>Proyecto UACh 2024 · 15 Archivos</p>
+              <span class="ver-mas">Ver más →</span>
+            </div>
+          </div>
+          <div class="col-card" onclick="navigate('collections')">
+            <div class="col-card-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80')"></div>
+            <div class="col-card-body">
+              <h4>Bosque Nativo Valdiviano</h4>
+              <p>Proyecto UACh 2023 · 28 Archivos</p>
+              <span class="ver-mas">Ver más →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="view" id="view-explorer">
+    <div class="explorer-layout">
+      <aside class="filters-panel">
+        <h3>Filtros</h3>
+        <div class="filter-group">
+          <label>Región</label>
+          <select id="filterRegion">
+            <option value="">Todas las regiones</option>
+            <option>Los Ríos</option>
+            <option>Los Lagos</option>
+            <option>Araucanía</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Ecosistema</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" value="humedal" checked> Humedal</label>
+            <label><input type="checkbox" value="bosque"> Bosque Nativo</label>
+            <label><input type="checkbox" value="costa"> Costa</label>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>Especie</label>
+          <input type="text" placeholder="Ej: Traro, Hued-Hued" id="filterSpecies">
+        </div>
+        <div class="filter-group">
+          <label>Rango de fechas</label>
+          <input type="date" id="filterDateFrom" style="margin-bottom:6px">
+          <input type="date" id="filterDateTo">
+        </div>
+        <button class="btn-apply" onclick="applyFilters()">Aplicar Filtros</button>
+      </aside>
+
+      <div class="results-area">
+        <div class="results-header">
+          <h2 id="resultsCount">0 resultados encontrados</h2>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:13px;color:var(--text-muted)">Ordenar por:</span>
+            <select class="sort-select" id="sortSelect">
+              <option>Relevancia</option>
+              <option>Más recientes</option>
+              <option>Más antiguas</option>
+              <option>Mayor duración</option>
+            </select>
+          </div>
+        </div>
+        <div id="resultsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-detail">
+    <div class="detail-layout">
+      <div class="detail-card">
+        <div class="detail-hero" id="detailHero" style="background-image:url('https://images.unsplash.com/photo-1470093851219-69951fcbb533?w=1200&q=80')">
+          <div class="detail-hero-overlay"></div>
+        </div>
+        <div class="detail-body">
+          <h1 class="detail-title" id="detailTitle">Amanecer en Humedal – Traro</h1>
+          <div class="detail-subtitle" id="detailSubtitle"></div>
+
+          <div class="detail-player">
+            <div class="detail-waveform" id="detailWaveform"></div>
+            <div class="player-controls">
+              <button class="play-btn" id="detailPlayBtn" onclick="toggleDetailPlay()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none" id="detailPlayIcon"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              </button>
+              <span class="player-time" id="detailTimeCurrent">0:00</span>
+              <div class="player-progress" onclick="seekDetail(event)">
+                <div class="player-progress-fill" id="detailProgressFill"></div>
+              </div>
+              <span class="player-time" id="detailTimeTotal">0:00</span>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="meta-section">
+              <h4>Información de la grabación</h4>
+              <div class="meta-list" id="detailMetaList"></div>
+              <div class="license-box">
+                <p><strong>Licencia:</strong> Uso permitido con atribución al proyecto y al autor. Uso académico y artístico permitido citando la fuente.</p>
+              </div>
+            </div>
+            <div class="meta-section">
+              <h4>Ubicación geográfica</h4>
+              <div class="map-container">
+                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80" alt="Mapa de ubicación">
+                <div class="map-pin"></div>
+              </div>
+              <p style="font-size:13px;color:var(--text-muted);margin-top:8px" id="detailLocation">Humedal Carlos Anwandter, Valdivia, Región de Los Ríos, Chile</p>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn btn-primary btn-lg" onclick="handleDownload()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              Descargar WAV · <span id="detailSize">42.2 MB</span>
+            </button>
+            <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+              Compartir
+            </button>
+            <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-upload">
+    <div class="upload-layout">
+      <div class="upload-card">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" x2="12" y1="18" y2="12"/><line x1="9" x2="12" y1="15" y2="12"/><line x1="15" x2="12" y1="15" y2="12"/></svg>
+          </div>
+          <h3>Arrastra y suelta tus archivos de audio hasta aquí</h3>
+          <p>o haz clic para seleccionar archivos (WAV, FLAC, MP3)</p>
+          <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">Seleccionar Archivo</button>
+          <input type="file" id="fileInput" accept=".wav,.flac,.mp3" multiple style="display:none" onchange="handleFiles(this.files)">
+        </div>
+        <div class="file-list" id="fileList"></div>
+
+        <div class="upload-section">
+          <h3>Metadatos obligatorios</h3>
+          <div class="form-row">
+            <div class="form-group full">
+              <label>Título de la grabación</label>
+              <input type="text" id="uploadTitle" placeholder="Ej: Amanecer en Humedal – Traro">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Especie (si se conoce)</label>
+              <input type="text" id="uploadSpecies" placeholder="Ej: Traro">
+            </div>
+            <div class="form-group">
+              <label>Fecha de captura</label>
+              <input type="date" id="uploadDate">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Coordenadas</label>
+              <input type="text" id="uploadCoords" placeholder="-39.8196, -73.2452">
+            </div>
+            <div class="form-group">
+              <label>Dispositivo de captura</label>
+              <input type="text" id="uploadDevice" placeholder="Ej: Song Meter SM4">
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-section">
+          <h3>Nivel de acceso</h3>
+          <div class="permission-options">
+            <label class="perm-option selected" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="public" checked>
+              <div>
+                <strong>Público (solo escucha)</strong>
+                <span>Cualquier visitante puede escuchar, pero no descargar.</span>
+              </div>
+            </label>
+            <label class="perm-option" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="investigador">
+              <div>
+                <strong>Investigadores Registrados</strong>
+                <span>Requiere inicio de sesión para descargar en alta calidad.</span>
+              </div>
+            </label>
+            <label class="perm-option" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="admin">
+              <div>
+                <strong>Solo Administrador</strong>
+                <span>Acceso restringido. Solo el responsable del proyecto puede gestionar el archivo.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="upload-actions">
+          <button class="btn btn-outline btn-lg" onclick="resetUpload()">Cancelar</button>
+          <button class="btn btn-primary btn-lg" onclick="publishRecording()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Publicar grabación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-permissions">
+    <div class="perm-layout">
+      <div class="perm-header">
+        <div class="perm-header-left">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div>
+            <h2>Gestión de permisos</h2>
+            <p>Controla quién puede acceder a tus proyectos</p>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="showToast('Nuevo proyecto creado','success')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          Nuevo proyecto
+        </button>
+      </div>
+
+      <div class="perm-table-wrap">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Proyecto / Grabación</th>
+              <th>Archivos</th>
+              <th>Nivel de acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="permTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-collections">
+    <section class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Todas las Colecciones</h2>
+        <div class="col-grid" id="allCollections"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-left">
+      ©2026 Custodis. Todos los derechos reservados.<br>
+      Universidad Austral de Chile. Facultad Ciencias de la Ingeniería
+    </div>
+    <div class="footer-right">
+      <span class="logo">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+        </div>
+        Custodis
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
