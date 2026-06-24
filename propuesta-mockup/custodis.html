@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custodis — Plataforma de custodia y acceso a archivos bioacústicos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#2E75B6;--primary-hover:#245f96;--secondary:#3C8C5A;--secondary-hover:#2e6e46;
+    --warning:#E8B23A;--bg:#FFFFFF;--bg-alt:#F5F5F5;--text:#1A1A1A;--text-muted:#6B6B6B;
+    --border:#BFBFBF;--border-light:#E5E5E5;--radius:10px;--radius-sm:6px;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.04);
+    --shadow-lg:0 4px 20px rgba(0,0,0,.1);
+  }
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none}
+  button{cursor:pointer;font-family:inherit;border:none;background:none}
+  input,select,textarea{font-family:inherit;font-size:inherit}
+  img{max-width:100%;display:block}
+  *:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:4px}
+
+  .header{background:var(--bg);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:100}
+  .header-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+  .logo{font-size:20px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;cursor:pointer}
+  .logo-icon{width:28px;height:28px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff}
+  .nav-links{display:flex;gap:8px;align-items:center}
+  .nav-links a{padding:8px 14px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-muted);transition:.2s;cursor:pointer}
+  .nav-links a:hover,.nav-links a.active{color:var(--text);background:var(--bg-alt)}
+  .nav-actions{display:flex;gap:10px;align-items:center}
+  .btn{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;transition:.2s;display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:44px;justify-content:center}
+  .btn-outline{border:1.5px solid var(--primary);color:var(--primary);background:transparent}
+  .btn-outline:hover{background:var(--primary);color:#fff}
+  .btn-primary{background:var(--primary);color:#fff;border:1.5px solid var(--primary)}
+  .btn-primary:hover{background:var(--primary-hover)}
+  .btn-secondary{background:var(--secondary);color:#fff}
+  .btn-secondary:hover{background:var(--secondary-hover)}
+  .btn-ghost{color:var(--primary)}
+  .btn-ghost:hover{background:rgba(46,117,182,.08)}
+  .btn-lg{padding:12px 28px;font-size:15px;border-radius:var(--radius)}
+  .btn-block{width:100%;justify-content:center}
+  .hamburger{display:none;padding:8px}
+
+  .user-menu{position:relative}
+  .user-avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer;border:2px solid transparent;transition:.2s}
+  .user-avatar:hover{border-color:var(--primary)}
+  .user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:240px;padding:8px;display:none;z-index:200}
+  .user-dropdown.active{display:block}
+  .user-dropdown-header{padding:12px;border-bottom:1px solid var(--border-light);margin-bottom:4px}
+  .user-dropdown-header strong{display:block;font-size:14px}
+  .user-dropdown-header span{font-size:12px;color:var(--text-muted)}
+  .user-dropdown a,.user-dropdown button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:var(--radius-sm);font-size:14px;color:var(--text);text-align:left;transition:.15s}
+  .user-dropdown a:hover,.user-dropdown button:hover{background:var(--bg-alt)}
+  .user-dropdown .divider{height:1px;background:var(--border-light);margin:4px 0}
+  .user-dropdown .logout{color:#c0392b}
+
+  main{flex:1}
+  .view{display:none}
+  .view.active{display:block}
+
+  .hero{background:linear-gradient(135deg,#f0f4f8 0%,#e8eef5 100%);padding:80px 24px 60px;text-align:center}
+  .hero h1{font-size:clamp(28px,4vw,42px);font-weight:700;margin-bottom:16px;line-height:1.2}
+  .hero p{font-size:16px;color:var(--text-muted);max-width:560px;margin:0 auto 32px}
+  .search-bar{max-width:640px;margin:0 auto;position:relative}
+  .search-bar input{width:100%;padding:16px 52px 16px 48px;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:15px;box-shadow:var(--shadow);transition:.2s}
+  .search-bar input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(46,117,182,.12)}
+  .search-bar .search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+
+  .section{padding:60px 24px}
+  .section-inner{max-width:1280px;margin:0 auto}
+  .section-title{font-size:22px;font-weight:700;margin-bottom:28px}
+
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+  .cat-card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:.25s;cursor:pointer;border:1px solid var(--border-light)}
+  .cat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+  .cat-card-img{height:160px;background-size:cover;background-position:center;background-color:#c0c0c0}
+  .cat-card-body{padding:20px;text-align:center}
+  .cat-card-body h3{font-size:16px;font-weight:600;margin-bottom:4px}
+  .cat-card-body p{font-size:13px;color:var(--text-muted)}
+
+  .col-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px}
+  .col-card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;border:1px solid var(--border-light);transition:.2s;cursor:pointer}
+  .col-card:hover{box-shadow:var(--shadow-lg)}
+  .col-card-img{width:140px;min-height:120px;background-size:cover;background-position:center;flex-shrink:0;background-color:#c0c0c0}
+  .col-card-body{padding:20px;flex:1;display:flex;flex-direction:column;justify-content:center}
+  .col-card-body h4{font-size:15px;font-weight:600;margin-bottom:4px}
+  .col-card-body p{font-size:13px;color:var(--text-muted);margin-bottom:12px}
+  .col-card-body .ver-mas{font-size:13px;font-weight:600;color:var(--secondary);align-self:flex-start}
+
+  .explorer-layout{max-width:1280px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:260px 1fr;gap:32px}
+  .filters-panel{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:24px;height:fit-content;position:sticky;top:88px}
+  .filters-panel h3{font-size:16px;font-weight:700;margin-bottom:20px}
+  .filter-group{margin-bottom:18px}
+  .filter-group label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+  .filter-group .filter-hint{font-size:12px;color:var(--text-muted);display:block;margin-bottom:8px;line-height:1.4}
+  .filter-group select,.filter-group input[type="text"],.filter-group input[type="date"]{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:#fff;transition:.2s}
+  .filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--primary)}
+  .checkbox-group{display:flex;flex-direction:column;gap:6px}
+  .checkbox-group label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;cursor:pointer}
+  .checkbox-group input[type="checkbox"]{accent-color:var(--primary);width:16px;height:16px}
+  .btn-apply{width:100%;padding:11px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:600;font-size:14px;margin-top:8px;transition:.2s;border:none}
+  .btn-apply:hover{background:var(--primary-hover)}
+
+  .mobile-filters-btn{display:none;padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;margin-bottom:16px;cursor:pointer;min-height:44px;font-size:14px;align-items:center;gap:8px}
+  .filters-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:89;display:none}
+  .filters-overlay.active{display:block}
+
+  .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .results-header h2{font-size:20px;font-weight:700}
+  .sort-select{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:#fff}
+
+  .recording-card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:.2s}
+  .recording-card:hover{box-shadow:var(--shadow)}
+  .recording-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+  .recording-card-header h3{font-size:20px;font-weight:600}
+  .format-badge{background:var(--secondary);color:#fff;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap}
+  .recording-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text-muted);margin-bottom:16px}
+  .recording-meta span{display:flex;align-items:center;gap:4px}
+  .waveform-row{display:flex;align-items:center;gap:16px}
+  .play-btn{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;border:none;font-size:16px}
+  .play-btn:hover{background:var(--primary-hover);transform:scale(1.05)}
+  .waveform{flex:1;height:48px;display:flex;align-items:center;gap:2px;cursor:pointer;position:relative}
+  .wave-bar{width:3px;background:var(--primary);border-radius:2px;opacity:.4;transition:opacity .15s}
+  .waveform:hover .wave-bar{opacity:.6}
+  .waveform.playing .wave-bar{animation:wavePulse 1s ease infinite alternate}
+  .wave-bar.active{opacity:1;background:var(--primary-hover)}
+  @keyframes wavePulse{0%{opacity:.3}100%{opacity:1}}
+
+  .detail-layout{max-width:960px;margin:0 auto;padding:40px 24px}
+  .detail-card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .detail-hero{height:200px;background-size:cover;background-position:center;position:relative;background-color:#c0c0c0}
+  .detail-hero-overlay{position:absolute;inset:0;background:linear-gradient(transparent,rgba(0,0,0,.4))}
+  .detail-body{padding:32px}
+  .detail-title{font-size:28px;font-weight:700;margin-bottom:8px}
+  .detail-subtitle{font-size:14px;color:var(--text-muted);margin-bottom:24px;display:flex;gap:16px;flex-wrap:wrap}
+  .detail-subtitle span{display:flex;align-items:center;gap:4px}
+  .detail-player{background:var(--bg-alt);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+  .detail-waveform{height:80px;display:flex;align-items:center;gap:2px;margin-bottom:16px}
+  .detail-waveform .wave-bar{width:4px}
+  .player-controls{display:flex;align-items:center;gap:16px}
+  .player-controls .play-btn{width:52px;height:52px}
+  .player-time{font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;min-width:40px}
+  .player-progress{flex:1;height:6px;background:var(--border-light);border-radius:3px;cursor:pointer;position:relative}
+  .player-progress-fill{height:100%;background:var(--primary);border-radius:3px;width:0%;transition:width .1s linear}
+
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+  .meta-section h4{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
+  .meta-list{display:flex;flex-direction:column;gap:10px}
+  .meta-item{display:flex;flex-direction:column;gap:2px}
+  .meta-item .meta-label{font-size:12px;color:var(--text-muted);font-weight:500}
+  .meta-item .meta-value{font-size:14px;font-weight:500}
+  .meta-item input{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;width:100%}
+  .meta-item input:focus{outline:none;border-color:var(--primary)}
+  .license-box{background:rgba(232,178,58,.1);border:1px solid rgba(232,178,58,.3);border-radius:var(--radius-sm);padding:14px;margin-top:16px}
+  .license-box p{font-size:13px;color:#8a6a10}
+  .license-box strong{color:#6b5200}
+
+  .map-container{border-radius:var(--radius);overflow:hidden;height:240px;background:linear-gradient(135deg,#c8e6c9 0%,#a5d6a7 100%);position:relative;display:flex;align-items:center;justify-content:center}
+  .map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(46,117,182,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(46,117,182,.1) 1px,transparent 1px);background-size:40px 40px}
+  .map-pin{position:absolute;width:24px;height:24px;background:var(--primary);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3);top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;cursor:pointer}
+  .map-pin::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--primary)}
+  .map-pin-pulse{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(46,117,182,.2);border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%{transform:translate(-50%,-50%) scale(.8);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+  .map-tooltip{position:absolute;bottom:12px;left:12px;background:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;box-shadow:var(--shadow);z-index:3}
+  .map-tooltip strong{display:block;color:var(--text)}
+  .map-tooltip span{color:var(--text-muted)}
+
+  .detail-actions{display:flex;flex-direction:column;gap:12px;padding-top:8px;border-top:1px solid var(--border-light)}
+  .download-warning{background:rgba(232,178,58,.1);border:1px solid rgba(232,178,58,.3);padding:12px 16px;border-radius:8px;display:flex;align-items:center;gap:10px}
+  .download-warning p{font-size:14px;color:#8a6a10;margin:0;flex:1}
+  .download-warning strong{color:#6b5200}
+  .download-actions-row{display:flex;gap:12px;flex-wrap:wrap}
+
+  .upload-layout{max-width:800px;margin:0 auto;padding:40px 24px}
+  .upload-card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:48px 24px;text-align:center;margin:24px;background:var(--bg-alt);transition:.2s;cursor:pointer}
+  .drop-zone.dragover{border-color:var(--primary);background:rgba(46,117,182,.04)}
+  .drop-zone-icon{width:48px;height:48px;background:var(--primary);border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;color:#fff;margin-bottom:16px}
+  .drop-zone h3{font-size:18px;font-weight:600;margin-bottom:6px}
+  .drop-zone p{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+  .drop-zone .btn{font-size:13px;padding:8px 18px}
+
+  .upload-section{padding:0 32px 32px}
+  .upload-section h3{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border-light)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .form-group{display:flex;flex-direction:column;gap:6px}
+  .form-group.full{grid-column:1/-1}
+  .form-group label{font-size:13px;font-weight:600}
+  .form-group input,.form-group select,.form-group textarea{padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;transition:.2s}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary)}
+  .form-group .error-msg{font-size:12px;color:#c0392b;margin-top:2px;display:none}
+  .form-group.has-error input{border-color:#c0392b}
+  .form-group.has-error .error-msg{display:block}
+
+  .permission-options{display:flex;flex-direction:column;gap:10px}
+  .perm-option{border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.2s;display:flex;gap:12px;align-items:flex-start}
+  .perm-option:hover{border-color:var(--primary)}
+  .perm-option.selected{border-color:var(--primary);background:rgba(46,117,182,.04)}
+  .perm-option input[type="radio"]{margin-top:3px;accent-color:var(--primary)}
+  .perm-option strong{font-size:14px;display:block;margin-bottom:2px}
+  .perm-option span{font-size:13px;color:var(--text-muted)}
+
+  .upload-actions{display:flex;gap:12px;justify-content:flex-end;padding:20px 32px;border-top:1px solid var(--border-light)}
+
+  .perm-layout{max-width:1100px;margin:0 auto;padding:40px 24px}
+  .perm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+  .perm-header-left{display:flex;align-items:center;gap:12px}
+  .perm-header-left h2{font-size:24px;font-weight:700}
+  .perm-header-left p{font-size:14px;color:var(--text-muted)}
+  .perm-table-wrap{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .perm-table{width:100%;border-collapse:collapse}
+  .perm-table th{text-align:left;padding:16px 20px;font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border-light);background:var(--bg-alt)}
+  .perm-table td{padding:20px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+  .perm-table tr:last-child td{border-bottom:none}
+  .perm-table .proj-name{font-weight:600;font-size:15px}
+  .perm-table .proj-date{font-size:13px;color:var(--text-muted)}
+  .perm-select{padding:10px 36px 10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:600;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A1A1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;cursor:pointer;min-width:220px;transition:.2s}
+  .perm-select:focus{outline:none;border-color:var(--primary)}
+  .perm-desc{font-size:13px;color:var(--text-muted);margin-top:6px;max-width:280px}
+  .perm-saved{color:var(--secondary);font-size:13px;font-weight:600;display:none}
+
+  .toast-container{position:fixed;top:80px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+  .toast{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:14px 20px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;font-size:14px;animation:slideIn .3s ease;min-width:280px}
+  .toast.success{border-left:4px solid var(--secondary)}
+  .toast.error{border-left:4px solid #c0392b}
+  .toast.info{border-left:4px solid var(--primary)}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-overlay.active{display:flex}
+  .modal{background:#fff;border-radius:var(--radius);max-width:440px;width:100%;padding:32px;box-shadow:var(--shadow-lg);animation:modalIn .25s ease;position:relative}
+  @keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h2{font-size:22px;font-weight:700;margin-bottom:6px}
+  .modal p{font-size:14px;color:var(--text-muted);margin-bottom:24px}
+  .modal .form-group{margin-bottom:14px}
+  .modal .btn-block{margin-top:8px}
+  .modal-close{position:absolute;top:16px;right:16px;padding:8px}
+
+  .footer{background:var(--bg);border-top:1px solid var(--border-light);padding:24px;margin-top:auto}
+  .footer-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .footer-left{font-size:12px;color:var(--text-muted);line-height:1.7}
+  .footer-right .logo{font-size:18px}
+
+  .file-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;padding:0 32px}
+  .file-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-alt);border-radius:var(--radius-sm);font-size:14px;flex-wrap:wrap}
+  .file-item-icon{color:var(--primary);font-size:18px}
+  .file-item-name{flex:1;font-weight:500;min-width:150px}
+  .file-item-size{color:var(--text-muted);font-size:13px}
+  .file-item-status{font-size:12px;font-weight:600;color:var(--secondary)}
+  .progress-bar{width:100px;height:4px;background:var(--border-light);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--primary);border-radius:2px;transition:width .3s}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+  .empty-state h3{font-size:18px;margin-bottom:8px;color:var(--text)}
+
+  .admin-banner{background:linear-gradient(135deg,#2E75B6 0%,#3C8C5A 100%);color:#fff;padding:32px 24px;text-align:center}
+  .admin-banner h1{font-size:28px;font-weight:700;margin-bottom:8px}
+  .admin-banner p{font-size:15px;opacity:.9}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+  .stat-card{background:#fff;border:1px solid var(--border-light);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .stat-card .stat-value{font-size:28px;font-weight:700;color:var(--primary)}
+  .stat-card .stat-label{font-size:13px;color:var(--text-muted);margin-top:4px}
+
+  .edit-mode-indicator{display:inline-block;background:var(--warning);color:#fff;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;margin-left:8px}
+
+  @media(max-width:900px){
+    .explorer-layout{grid-template-columns:1fr}
+    .detail-grid{grid-template-columns:1fr}
+    .form-row{grid-template-columns:1fr}
+    .col-grid{grid-template-columns:1fr}
+    .perm-table-wrap{overflow-x:auto}
+    .perm-table{min-width:700px}
+  }
+  @media(max-width:700px){
+    .nav-links{display:none}
+    .hamburger{display:block}
+    .hero{padding:48px 20px 40px}
+    .section{padding:40px 20px}
+    .nav-mobile{position:fixed;inset:0;background:#fff;z-index:150;padding:80px 24px 24px;display:none;flex-direction:column;gap:8px;overflow-y:auto}
+    .nav-mobile.active{display:flex}
+    .nav-mobile a{padding:14px;font-size:16px;border-bottom:1px solid var(--border-light);cursor:pointer}
+    .nav-mobile-close{position:absolute;top:18px;right:18px;padding:8px}
+    .header-inner{padding:0 16px}
+    .upload-section{padding:0 16px 24px}
+    .upload-actions{padding:16px}
+    .detail-body{padding:20px}
+    .file-list{padding:0 16px}
+    .detail-title{font-size:22px}
+    
+    .mobile-filters-btn{display:inline-flex}
+    .filters-panel{
+      position:fixed;
+      top:64px;
+      left:-100%;
+      width:85%;
+      max-width:320px;
+      height:calc(100vh - 64px);
+      z-index:90;
+      transition:left 0.3s ease;
+      overflow-y:auto;
+      box-shadow:2px 0 8px rgba(0,0,0,0.15);
+      border-radius:0;
+    }
+    .filters-panel.active{left:0}
+  }
+  @media(min-width:701px){
+    .filters-overlay{display:none !important}
+  }
+</style>
+</head>
+<body>
+
+<audio id="globalAudio" src="audio_humedal_test.mp3" preload="auto"></audio>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="navigate('home')">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+      </div>
+      Custodis
+    </div>
+    <nav class="nav-links" id="navLinks">
+      <a data-nav="home" onclick="navigate('home')">Inicio</a>
+      <a data-nav="explorer" onclick="navigate('explorer')">Explorar</a>
+      <a data-nav="collections" onclick="navigate('collections')">Colecciones</a>
+    </nav>
+    <div class="nav-actions" id="navActions">
+      <button class="btn btn-outline" id="btnLogin" onclick="openModal('login')">Iniciar sesión</button>
+      <button class="btn btn-primary" id="btnRegister" onclick="openModal('register')">Registrarse</button>
+      <div class="user-menu" id="userMenu" style="display:none">
+        <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">AD</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-header">
+            <strong id="userName">Admin</strong>
+            <span id="userEmail">admin@custodis.cl</span>
+          </div>
+          <a onclick="navigate('upload');closeUserMenu()">📤 Cargar archivos</a>
+          <a onclick="navigate('permissions');closeUserMenu()">🔐 Gestión de permisos</a>
+          <a onclick="navigate('activity');closeUserMenu()">📊 Actividad</a>
+          <div class="divider"></div>
+          <button class="logout" onclick="logout()">Cerrar sesión</button>
+        </div>
+      </div>
+      <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menú">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="nav-mobile" id="mobileNav">
+  <button class="nav-mobile-close" onclick="toggleMobileNav()" aria-label="Cerrar menú">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+  <a onclick="navigate('home');toggleMobileNav()">Inicio</a>
+  <a onclick="navigate('explorer');toggleMobileNav()">Explorar</a>
+  <a onclick="navigate('collections');toggleMobileNav()">Colecciones</a>
+  <a onclick="navigate('upload');toggleMobileNav()">📤 Cargar archivos</a>
+  <a onclick="navigate('permissions');toggleMobileNav()">🔐 Gestión de permisos</a>
+  <a onclick="navigate('activity');toggleMobileNav()">📊 Actividad</a>
+  <a onclick="openModal('login');toggleMobileNav()">Iniciar sesión</a>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')" aria-label="Cerrar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <h2>Iniciar sesión</h2>
+    <p>Accede a tu cuenta para descargar archivos y gestionar proyectos.</p>
+    <div class="form-group">
+      <label for="loginEmail">Correo electrónico</label>
+      <input type="email" id="loginEmail" placeholder="tu@correo.cl" value="admin@custodis.cl">
+    </div>
+    <div class="form-group">
+      <label for="loginPassword">Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" value="password">
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('register')" aria-label="Cerrar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <h2>Crear cuenta</h2>
+    <p>Regístrate para descargar archivos en alta calidad y acceder a colecciones completas.</p>
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input type="text" placeholder="Tu nombre">
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" placeholder="tu@correo.cl">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" placeholder="Mínimo 8 caracteres">
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="closeModal('register');showToast('Cuenta creada exitosamente','success')">Registrarse</button>
+  </div>
+</div>
+
+<main>
+  <!-- HOME -->
+  <div class="view active" id="view-home">
+    <section class="hero">
+      <h1>Custodia y acceso a archivos bioacústicos</h1>
+      <p>Explora y escucha grabaciones de naturaleza y humedales del sur de Chile. Explora y escucha sin crear una cuenta.</p>
+      <div class="search-bar">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Busca por especie, lugar o ecosistema..." id="homeSearch" onkeydown="if(event.key==='Enter')navigate('explorer')" aria-label="Buscar grabaciones">
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Explora por Categorías</h2>
+        <div class="cat-grid">
+          <div class="cat-card" onclick="navigate('explorer')">
+            <div class="cat-card-img" style="background:linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)"></div>
+            <div class="cat-card-body">
+              <h3>Aves Endémicas</h3>
+              <p>128 grabaciones disponibles</p>
+            </div>
+          </div>
+          <div class="cat-card" onclick="navigate('explorer')">
+            <div class="cat-card-img" style="background:linear-gradient(135deg,#5b8fb9 0%,#2e5f8f 100%)"></div>
+            <div class="cat-card-body">
+              <h3>Humedales de los ríos</h3>
+              <p>42 grabaciones disponibles</p>
+            </div>
+          </div>
+          <div class="cat-card" onclick="navigate('explorer')">
+            <div class="cat-card-img" style="background:linear-gradient(135deg,#e8b23a 0%,#c49520 100%)"></div>
+            <div class="cat-card-body">
+              <h3>Mapa de grabaciones</h3>
+              <p>Exploración geográfica interactiva</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="background:var(--bg-alt)">
+      <div class="section-inner">
+        <h2 class="section-title">Colecciones Destacadas</h2>
+        <div class="col-grid">
+          <div class="col-card" onclick="navigate('collections')">
+            <div class="col-card-img" style="background:linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)"></div>
+            <div class="col-card-body">
+              <h4>Monitoreo Humedal Carlos Anwandter</h4>
+              <p>Proyecto UACh 2024 · 15 Archivos</p>
+              <span class="ver-mas">Ver más →</span>
+            </div>
+          </div>
+          <div class="col-card" onclick="navigate('collections')">
+            <div class="col-card-img" style="background:linear-gradient(135deg,#2e5f8f 0%,#1a3d5c 100%)"></div>
+            <div class="col-card-body">
+              <h4>Bosque Nativo Valdiviano</h4>
+              <p>Proyecto UACh 2023 · 28 Archivos</p>
+              <span class="ver-mas">Ver más →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- EXPLORER -->
+  <div class="view" id="view-explorer">
+    <div class="explorer-layout">
+      <aside class="filters-panel" id="filtersPanel">
+        <h3>Filtros</h3>
+        <div class="filter-group">
+          <label for="filterRegion">Región</label>
+          <select id="filterRegion">
+            <option value="">Todas las regiones</option>
+            <option>Los Ríos</option>
+            <option>Los Lagos</option>
+            <option>Araucanía</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Ecosistema</label>
+          <span class="filter-hint">Ej: Humedal, bosque nativo, costa...</span>
+          <div class="checkbox-group">
+            <label><input type="checkbox" value="Humedal" checked> Humedal</label>
+            <label><input type="checkbox" value="Bosque Nativo"> Bosque Nativo</label>
+            <label><input type="checkbox" value="Costa"> Costa</label>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label for="filterSpecies">Especie</label>
+          <input type="text" placeholder="Ej: Traro, Hued-Hued" id="filterSpecies">
+        </div>
+        <div class="filter-group">
+          <label>Rango de fechas</label>
+          <input type="date" id="filterDateFrom" style="margin-bottom:6px">
+          <input type="date" id="filterDateTo">
+        </div>
+        <button class="btn-apply" onclick="applyFilters()">Aplicar Filtros</button>
+      </aside>
+
+      <div class="results-area">
+        <button class="mobile-filters-btn" onclick="toggleMobileFilters()" aria-label="Mostrar filtros">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtros
+        </button>
+        <div class="filters-overlay" id="filtersOverlay" onclick="toggleMobileFilters()"></div>
+        
+        <div class="results-header">
+          <h2 id="resultsCount">0 resultados encontrados</h2>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:13px;color:var(--text-muted)">Ordenar por:</span>
+            <select class="sort-select" id="sortSelect">
+              <option>Relevancia</option>
+              <option>Más recientes</option>
+              <option>Más antiguas</option>
+              <option>Mayor duración</option>
+            </select>
+          </div>
+        </div>
+        <div id="resultsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="view" id="view-detail">
+    <div class="detail-layout">
+      <div class="detail-card">
+        <div class="detail-hero" id="detailHero" style="background:linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)">
+          <div class="detail-hero-overlay"></div>
+        </div>
+        <div class="detail-body">
+          <h1 class="detail-title" id="detailTitle">Amanecer en Humedal – Traro</h1>
+          <div class="detail-subtitle" id="detailSubtitle"></div>
+
+          <div class="detail-player">
+            <div class="detail-waveform" id="detailWaveform"></div>
+            <div class="player-controls">
+              <button class="play-btn" id="detailPlayBtn" onclick="toggleDetailPlay()" aria-label="Reproducir">▶</button>
+              <span class="player-time" id="detailTimeCurrent">0:00</span>
+              <div class="player-progress" onclick="seekDetail(event)" role="progressbar" aria-label="Progreso de reproducción">
+                <div class="player-progress-fill" id="detailProgressFill"></div>
+              </div>
+              <span class="player-time" id="detailTimeTotal">0:00</span>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="meta-section">
+              <h4>Información de la grabación <span class="edit-mode-indicator" id="editIndicator" style="display:none">✎ Editando</span></h4>
+              <div class="meta-list" id="detailMetaList"></div>
+              <div class="license-box">
+                <p><strong>Licencia:</strong> Uso permitido con atribución al proyecto y al autor. Uso académico y artístico permitido citando la fuente.</p>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px" id="editActions" style="display:none"></div>
+            </div>
+            <div class="meta-section">
+              <h4>Ubicación geográfica</h4>
+              <div class="map-container">
+                <div class="map-grid"></div>
+                <div class="map-pin-pulse"></div>
+                <div class="map-pin" title="Ubicación de la grabación"></div>
+                <div class="map-tooltip">
+                  <strong id="mapTooltipTitle">Humedal Carlos Anwandter</strong>
+                  <span id="mapTooltipCoords">Valdivia, Los Ríos</span>
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text-muted);margin-top:8px" id="detailLocation">Humedal Carlos Anwandter, Valdivia, Región de Los Ríos, Chile</p>
+            </div>
+          </div>
+
+          <div class="detail-actions" id="detailActions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="view" id="view-upload">
+    <div class="admin-banner">
+      <h1>📤 Cargar archivos</h1>
+      <p>Sube nuevas grabaciones bioacústicas y completa sus metadatos para publicarlas en la plataforma.</p>
+    </div>
+    <div class="upload-layout">
+      <div class="upload-card">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" x2="12" y1="18" y2="12"/><line x1="9" x2="12" y1="15" y2="12"/><line x1="15" x2="12" y1="15" y2="12"/></svg>
+          </div>
+          <h3>Arrastra y suelta tus archivos de audio hasta aquí</h3>
+          <p>o haz clic para seleccionar archivos (WAV, FLAC, MP3)</p>
+          <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">Seleccionar Archivo</button>
+          <input type="file" id="fileInput" accept=".wav,.flac,.mp3" multiple style="display:none" onchange="handleFiles(this.files)">
+        </div>
+        <div class="file-list" id="fileList"></div>
+
+        <div class="upload-section">
+          <h3>Metadatos obligatorios</h3>
+          <div class="form-row">
+            <div class="form-group full" id="fg-title">
+              <label for="uploadTitle">Título de la grabación *</label>
+              <input type="text" id="uploadTitle" placeholder="Ej: Amanecer en Humedal – Traro">
+              <span class="error-msg">Falta el título de la grabación. Complétalo para poder publicar.</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" id="fg-species">
+              <label for="uploadSpecies">Especie (si se conoce)</label>
+              <input type="text" id="uploadSpecies" placeholder="Ej: Traro">
+            </div>
+            <div class="form-group" id="fg-date">
+              <label for="uploadDate">Fecha de captura *</label>
+              <input type="date" id="uploadDate">
+              <span class="error-msg">Falta la fecha de captura. Complétala para poder publicar.</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="uploadCoords">Coordenadas</label>
+              <input type="text" id="uploadCoords" placeholder="-39.8196, -73.2452">
+            </div>
+            <div class="form-group">
+              <label for="uploadDevice">Dispositivo de captura</label>
+              <input type="text" id="uploadDevice" placeholder="Ej: Song Meter SM4">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label for="uploadProject">Proyecto asociado</label>
+              <select id="uploadProject">
+                <option value="">Selecciona un proyecto...</option>
+                <option>Monitoreo Humedal Carlos Anwandter</option>
+                <option>Bosque Nativo Valdiviano</option>
+                <option>Anfibios del Sur</option>
+                <option>Costa Patagónica</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-section">
+          <h3>Nivel de acceso</h3>
+          <div class="permission-options">
+            <label class="perm-option selected" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="public" checked>
+              <div>
+                <strong>Público (solo escucha)</strong>
+                <span>Cualquier visitante puede escuchar, pero no descargar.</span>
+              </div>
+            </label>
+            <label class="perm-option" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="registrado">
+              <div>
+                <strong>Usuarios Registrados</strong>
+                <span>Usuarios con cuenta pueden escuchar y descargar en MP3.</span>
+              </div>
+            </label>
+            <label class="perm-option" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="investigador">
+              <div>
+                <strong>Investigadores Registrados</strong>
+                <span>Requiere inicio de sesión para descargar en alta calidad (WAV/FLAC).</span>
+              </div>
+            </label>
+            <label class="perm-option" onclick="selectPerm(this)">
+              <input type="radio" name="uploadPerm" value="admin">
+              <div>
+                <strong>Solo Administrador</strong>
+                <span>Acceso restringido. Solo el responsable del proyecto puede gestionar el archivo.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="upload-actions">
+          <button class="btn btn-outline btn-lg" onclick="resetUpload()">Cancelar</button>
+          <button class="btn btn-primary btn-lg" onclick="publishRecording()">✓ Publicar grabación</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERMISSIONS -->
+  <div class="view" id="view-permissions">
+    <div class="admin-banner">
+      <h1>🔐 Gestión de permisos</h1>
+      <p>Controla quién puede escuchar y descargar tus proyectos. Los cambios se aplican inmediatamente.</p>
+    </div>
+    <div class="perm-layout">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">4</div>
+          <div class="stat-label">Proyectos activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statPublic">2</div>
+          <div class="stat-label">Acceso público</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statRestricted">1</div>
+          <div class="stat-label">Solo investigadores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statAdmin">1</div>
+          <div class="stat-label">Solo administrador</div>
+        </div>
+      </div>
+
+      <div class="perm-header">
+        <div class="perm-header-left">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div>
+            <h2>Tus proyectos</h2>
+            <p>Selecciona el nivel de acceso para cada grabación o proyecto</p>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="showToast('Nuevo proyecto creado','success')">＋ Nuevo proyecto</button>
+      </div>
+
+      <div class="perm-table-wrap">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Proyecto / Grabación</th>
+              <th>Archivos</th>
+              <th>Nivel de acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="permTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="view" id="view-activity">
+    <div class="admin-banner">
+      <h1>📊 Panel de actividad</h1>
+      <p>Visualiza descargas, accesos y solicitudes sobre tus archivos.</p>
+    </div>
+    <div class="perm-layout">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">128</div>
+          <div class="stat-label">Descargas totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">342</div>
+          <div class="stat-label">Reproducciones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Solicitudes pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Usuarios activos hoy</div>
+        </div>
+      </div>
+
+      <div class="perm-header">
+        <div class="perm-header-left">
+          <div>
+            <h2>Actividad reciente</h2>
+            <p>Últimas acciones sobre tus archivos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="perm-table-wrap">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Archivo</th>
+              <th>Acción</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Valentina Torres</strong><br><span style="font-size:12px;color:var(--text-muted)">valentina@artista.cl</span></td>
+              <td>Amanecer en Humedal – Traro</td>
+              <td><span style="background:var(--secondary);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Descarga FLAC</span></td>
+              <td>Hace 2 horas</td>
+            </tr>
+            <tr>
+              <td><strong>Carlos Méndez</strong><br><span style="font-size:12px;color:var(--text-muted)">cmendez@uach.cl</span></td>
+              <td>Canto matutino – Hued-Hued</td>
+              <td><span style="background:var(--primary);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Descarga WAV</span></td>
+              <td>Hace 5 horas</td>
+            </tr>
+            <tr>
+              <td><strong>Visitante anónimo</strong></td>
+              <td>Noche en el humedal – Ranas</td>
+              <td><span style="background:var(--text-muted);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Reproducción</span></td>
+              <td>Hace 1 día</td>
+            </tr>
+            <tr>
+              <td><strong>María López</strong><br><span style="font-size:12px;color:var(--text-muted)">mlopez@investigador.cl</span></td>
+              <td>Bosque lluvioso – Chucao</td>
+              <td><span style="background:var(--warning);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Solicitud acceso</span></td>
+              <td>Hace 2 días</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLLECTIONS -->
+  <div class="view" id="view-collections">
+    <section class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Todas las Colecciones</h2>
+        <div class="col-grid" id="allCollections"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-left">
+      ©2026 Custodis. Todos los derechos reservados.<br>
+      Universidad Austral de Chile. Facultad Ciencias de la Ingeniería
+    </div>
+    <div class="footer-right">
+      <span class="logo">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+        </div>
+        Custodis
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const recordings = [
+  {id:1,title:'Amanecer en Humedal – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-12',duration:'4:30',files:15,size:'42.2MB',format:'WAV',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos',coords:'-39.8196, -73.2452'},
+  {id:2,title:'Canto matutino – Hued-Hued',region:'Los Ríos',ecosystem:'Bosque Nativo',species:'Hued-Hued',date:'2026-09-28',duration:'3:15',files:8,size:'28.4MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Valdivia, Los Ríos',coords:'-39.7500, -73.1800'},
+  {id:3,title:'Noche en el humedal – Ranas',region:'Los Lagos',ecosystem:'Humedal',species:'Rana de Darwin',date:'2026-10-05',duration:'6:20',files:22,size:'55.1MB',format:'FLAC',device:'Song Meter SM4',project:'Anfibios del Sur',location:'Puerto Montt, Los Lagos',coords:'-40.1200, -73.3500'},
+  {id:4,title:'Vientos costeros – Gaviotas',region:'Los Lagos',ecosystem:'Costa',species:'Gaviota dominicana',date:'2026-08-15',duration:'2:45',files:5,size:'18.7MB',format:'WAV',device:'Zoom H6',project:'Costa Patagónica',location:'Puerto Montt, Los Lagos',coords:'-41.2000, -73.0500'},
+  {id:5,title:'Bosque lluvioso – Chucao',region:'Araucanía',ecosystem:'Bosque Nativo',species:'Chucao',date:'2026-10-01',duration:'5:10',files:12,size:'38.9MB',format:'WAV',device:'AudioMoth',project:'Bosque Nativo Valdiviano',location:'Temuco, Araucanía',coords:'-38.9500, -72.1200'},
+  {id:6,title:'Amanecer ribereño – Traro',region:'Los Ríos',ecosystem:'Humedal',species:'Traro',date:'2026-10-10',duration:'4:00',files:10,size:'35.2MB',format:'FLAC',device:'Song Meter SM4',project:'Monitoreo Humedal Carlos Anwandter',location:'Valdivia, Los Ríos',coords:'-39.8300, -73.2100'},
+];
+
+const collections = [
+  {name:'Monitoreo Humedal Carlos Anwandter',project:'Proyecto UACh 2024',files:15,color:'linear-gradient(135deg,#7fb069 0%,#4a7c3f 100%)'},
+  {name:'Bosque Nativo Valdiviano',project:'Proyecto UACh 2023',files:28,color:'linear-gradient(135deg,#2e5f8f 0%,#1a3d5c 100%)'},
+  {name:'Anfibios del Sur de Chile',project:'Proyecto UACh 2025',files:12,color:'linear-gradient(135deg,#e8b23a 0%,#c49520 100%)'},
+  {name:'Costa Patagónica',project:'Proyecto UACh 2024',files:8,color:'linear-gradient(135deg,#5b8fb9 0%,#2e5f8f 100%)'},
+];
+
+const permProjects = [
+  {id:1,name:'Monitoreo Humedal Miraflores',date:'12 de Oct del 2023',files:53,level:'investigador',desc:'Los usuarios con cuenta verificada pueden descargar en WAV/FLAC.'},
+  {id:2,name:'Monitoreo Humedal Miraflores (subset)',date:'12 de Oct del 2023',files:33,level:'public',desc:'Cualquier visitante puede escuchar, pero no descargar.'},
+  {id:3,name:'Bosque Nativo Valdiviano',date:'05 de Sep del 2024',files:28,level:'public',desc:'Cualquier visitante puede escuchar, pero no descargar.'},
+  {id:4,name:'Anfibios del Sur',date:'20 de Mar del 2025',files:12,level:'admin',desc:'Solo el administrador puede acceder y gestionar los archivos.'},
+];
+
+const testAudio = document.getElementById('globalAudio');
+let currentActiveCard = null;
+let uploadedFiles = [];
+let isLoggedIn = false;
+let isEditingMetadata = false;
+let currentDetailId = null;
+
+testAudio.addEventListener('timeupdate', () => {
+  if (!testAudio.duration) return;
+  const progress = (testAudio.currentTime / testAudio.duration) * 100;
+
+  if (currentActiveCard) {
+    const waveform = document.getElementById('wf_' + currentActiveCard);
+    if (waveform) {
+      const bars = waveform.querySelectorAll('.wave-bar');
+      const activeIndex = Math.floor((progress / 100) * bars.length);
+      bars.forEach((bar, idx) => {
+        if (idx <= activeIndex) { bar.classList.add('active'); bar.style.opacity = '1'; }
+        else { bar.classList.remove('active'); }
+      });
+    }
+  }
+
+  if (document.getElementById('view-detail').classList.contains('active')) {
+    document.getElementById('detailProgressFill').style.width = progress + '%';
+    const curSec = Math.floor(testAudio.currentTime);
+    document.getElementById('detailTimeCurrent').textContent = Math.floor(curSec/60) + ':' + String(curSec%60).padStart(2,'0');
+    updateDetailWaveformBars(progress);
+  }
+});
+
+testAudio.addEventListener('play', () => {
+  if (currentActiveCard) {
+    const waveform = document.getElementById('wf_' + currentActiveCard);
+    if (waveform) waveform.classList.add('playing');
+  }
+  const btn = document.getElementById('detailPlayBtn');
+  if (btn) btn.textContent = '⏸';
+});
+
+testAudio.addEventListener('pause', () => {
+  if (currentActiveCard) {
+    const waveform = document.getElementById('wf_' + currentActiveCard);
+    if (waveform) waveform.classList.remove('playing');
+  }
+  const btn = document.getElementById('detailPlayBtn');
+  if (btn && !testAudio.paused === false) btn.textContent = '▶';
+});
+
+testAudio.addEventListener('ended', () => {
+  document.querySelectorAll('.play-btn').forEach(b => { if (b.id && b.id.startsWith('playBtn')) b.textContent = '▶'; });
+  document.querySelectorAll('.waveform').forEach(w => w.classList.remove('playing'));
+  document.querySelectorAll('.wave-bar').forEach(b => { b.classList.remove('active'); b.style.opacity = ''; });
+  const btn = document.getElementById('detailPlayBtn');
+  if (btn) btn.textContent = '▶';
+  currentActiveCard = null;
+});
+
+function updateDetailWaveformBars(progress) {
+  const waveform = document.getElementById('detailWaveform');
+  if (!waveform) return;
+  const bars = waveform.querySelectorAll('.wave-bar');
+  const activeIndex = Math.floor((progress / 100) * bars.length);
+  bars.forEach((bar, idx) => {
+    if (idx <= activeIndex) { bar.classList.add('active'); bar.style.opacity = '1'; }
+    else { bar.classList.remove('active'); }
+  });
+}
+
+function navigate(view, data) {
+  if ((view === 'upload' || view === 'permissions' || view === 'activity') && !isLoggedIn) {
+    showToast('Debes iniciar sesión para acceder a esta sección', 'info');
+    openModal('login');
+    return;
+  }
+
+  if (currentActiveCard && !testAudio.paused) testAudio.pause();
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('view-' + view);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navLink = document.querySelector('.nav-links a[data-nav="' + view + '"]');
+  if (navLink) navLink.classList.add('active');
+
+  window.scrollTo(0, 0);
+
+  if (view === 'explorer') renderRecordings();
+  else if (view === 'detail' && data) loadDetail(data);
+  else if (view === 'permissions') renderPermissions();
+  else if (view === 'collections') renderCollections();
+}
+
+function generateWaveform(count, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const h = 8 + Math.random() * 32;
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    bar.style.height = h + 'px';
+    container.appendChild(bar);
+  }
+}
+
+function renderRecordings(filteredList) {
+  const list = filteredList || recordings;
+  const container = document.getElementById('resultsList');
+  if (!container) return;
+
+  document.getElementById('resultsCount').textContent = list.length + ' resultado' + (list.length !== 1 ? 's' : '') + ' encontrado' + (list.length !== 1 ? 's' : '');
+
+  if (list.length === 0) {
+    container.innerHTML = '<div class="empty-state"><h3>No encontramos grabaciones con esos filtros</h3><p>Prueba ampliar la zona o quitar alguno.</p></div>';
+    return;
+  }
+
+  container.innerHTML = list.map(r => {
+    const wfId = 'wf_' + r.id;
+    return `
+    <div class="recording-card" onclick="navigate('detail',${r.id})" style="cursor:pointer">
+      <div class="recording-card-header">
+        <h3>${r.title}</h3>
+        <span class="format-badge">${r.format} · ${r.size}</span>
+      </div>
+      <div class="recording-meta">
+        <span>📍 ${r.location}</span>
+        <span>📁 ${r.files} Archivos</span>
+        <span> ${formatDate(r.date)}</span>
+        <span>🕐 ${r.duration}</span>
+      </div>
+      <div class="waveform-row" onclick="event.stopPropagation();togglePlay(${r.id},'${wfId}')">
+        <button class="play-btn" id="playBtn${r.id}" aria-label="Reproducir">▶</button>
+        <div class="waveform" id="${wfId}"></div>
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  list.forEach(r => generateWaveform(80, 'wf_' + r.id));
+}
+
+function formatDate(d) {
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const parts = d.split('-');
+  return parseInt(parts[2]) + ' ' + months[parseInt(parts[1])-1] + ' ' + parts[0];
+}
+
+function togglePlay(id, wfId) {
+  const btn = document.getElementById('playBtn' + id);
+  const waveform = document.getElementById(wfId);
+  if (!btn || !waveform) return;
+
+  if (currentActiveCard === id && !testAudio.paused) {
+    testAudio.pause();
+    btn.textContent = '▶';
+    waveform.classList.remove('playing');
+    return;
+  }
+
+  if (currentActiveCard && currentActiveCard !== id) {
+    const prevBtn = document.getElementById('playBtn' + currentActiveCard);
+    const prevWf = document.getElementById('wf_' + currentActiveCard);
+    if (prevBtn) prevBtn.textContent = '▶';
+    if (prevWf) {
+      prevWf.classList.remove('playing');
+      prevWf.querySelectorAll('.wave-bar').forEach(b => { b.classList.remove('active'); b.style.opacity = ''; });
+    }
+  }
+
+  currentActiveCard = id;
+  testAudio.currentTime = 0;
+  testAudio.play().catch(err => {
+    showToast('No se pudo reproducir el audio. Verifica que audio_humedal_test.mp3 esté en la misma carpeta.', 'error');
+    btn.textContent = '▶';
+  });
+  waveform.classList.add('playing');
+  showToast('Reproduciendo: ' + recordings.find(r => r.id === id)?.title, 'info');
+}
+
+function loadDetail(id) {
+  const r = recordings.find(x => x.id === id) || recordings[0];
+  currentDetailId = id;
+  isEditingMetadata = false;
+  
+  document.getElementById('detailTitle').textContent = r.title;
+  document.getElementById('detailLocation').textContent = r.location + ', Chile';
+  document.getElementById('mapTooltipTitle').textContent = r.project;
+  document.getElementById('mapTooltipCoords').textContent = r.location;
+
+  document.getElementById('detailSubtitle').innerHTML = `
+    <span>📍 ${r.location}</span>
+    <span>📁 ${r.files} Archivos</span>
+    <span>📅 ${formatDate(r.date)}</span>
+    <span>🕐 ${r.duration}</span>
+  `;
+
+  renderMetaList(r);
+
+  if (!testAudio.paused) testAudio.pause();
+  testAudio.currentTime = 0;
+  currentActiveCard = null;
+  document.getElementById('detailProgressFill').style.width = '0%';
+  document.getElementById('detailTimeCurrent').textContent = '0:00';
+  document.getElementById('detailPlayBtn').textContent = '▶';
+
+  generateWaveform(120, 'detailWaveform');
+
+  const updateDuration = () => {
+    if (testAudio.duration) {
+      const dur = Math.floor(testAudio.duration);
+      document.getElementById('detailTimeTotal').textContent = Math.floor(dur/60) + ':' + String(dur%60).padStart(2,'0');
+    }
+  };
+  if (testAudio.duration) updateDuration();
+  else testAudio.addEventListener('loadedmetadata', updateDuration, { once: true });
+
+  renderDetailActions(r);
+}
+
+function renderMetaList(r) {
+  const metaList = document.getElementById('detailMetaList');
+  if (isEditingMetadata && isLoggedIn) {
+    metaList.innerHTML = `
+      <div class="meta-item"><span class="meta-label">Especie</span><input type="text" id="editSpecies" value="${r.species}"></div>
+      <div class="meta-item"><span class="meta-label">Fecha de captura</span><input type="date" id="editDate" value="${r.date}"></div>
+      <div class="meta-item"><span class="meta-label">Dispositivo</span><input type="text" id="editDevice" value="${r.device}"></div>
+      <div class="meta-item"><span class="meta-label">Proyecto</span><input type="text" id="editProject" value="${r.project}"></div>
+      <div class="meta-item"><span class="meta-label">Coordenadas</span><input type="text" id="editCoords" value="${r.coords || ''}"></div>
+    `;
+    document.getElementById('editIndicator').style.display = 'inline-block';
+    document.getElementById('editActions').style.display = 'flex';
+    document.getElementById('editActions').innerHTML = `
+      <button class="btn btn-primary" onclick="saveMetadata(${r.id})">💾 Guardar cambios</button>
+      <button class="btn btn-outline" onclick="cancelEdit(${r.id})">Cancelar</button>
+    `;
+  } else {
+    metaList.innerHTML = `
+      <div class="meta-item"><span class="meta-label">Especie</span><span class="meta-value">${r.species}</span></div>
+      <div class="meta-item"><span class="meta-label">Fecha de captura</span><span class="meta-value">${formatDate(r.date)} — 06:15 AM</span></div>
+      <div class="meta-item"><span class="meta-label">Dispositivo</span><span class="meta-value">${r.device}</span></div>
+      <div class="meta-item"><span class="meta-label">Proyecto</span><span class="meta-value">${r.project}</span></div>
+    `;
+    document.getElementById('editIndicator').style.display = 'none';
+    document.getElementById('editActions').style.display = 'none';
+  }
+}
+
+function renderDetailActions(r) {
+  const actionsContainer = document.getElementById('detailActions');
+  if (!isLoggedIn) {
+    actionsContainer.innerHTML = `
+      <div class="download-warning">
+        <span style="font-size:20px">🔒</span>
+        <p><strong>Inicia sesión</strong> para descargar este archivo en alta calidad (WAV/FLAC).</p>
+      </div>
+      <div class="download-actions-row">
+        <button class="btn btn-primary btn-lg" onclick="handleDownload()">⬇ Descargar WAV · ${r.size}</button>
+        <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">↗ Compartir</button>
+        <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
+      </div>
+    `;
+  } else {
+    actionsContainer.innerHTML = `
+      <div class="download-actions-row">
+        <button class="btn btn-primary btn-lg" onclick="handleDownload()">⬇ Descargar WAV · ${r.size}</button>
+        <button class="btn btn-outline btn-lg" onclick="showToast('Enlace copiado al portapapeles','info')">↗ Compartir</button>
+        <button class="btn btn-ghost btn-lg" onclick="toggleEditMetadata(${r.id})">✎ Editar metadatos</button>
+        <button class="btn btn-ghost btn-lg" onclick="navigate('explorer')">← Regresar al explorador</button>
+      </div>
+    `;
+  }
+}
+
+function toggleEditMetadata(id) {
+  isEditingMetadata = !isEditingMetadata;
+  const r = recordings.find(x => x.id === id);
+  if (r) {
+    renderMetaList(r);
+    showToast(isEditingMetadata ? 'Modo edición activado. Modifica los campos y guarda los cambios.' : 'Edición cancelada', 'info');
+  }
+}
+
+function saveMetadata(id) {
+  const r = recordings.find(x => x.id === id);
+  if (!r) return;
+  
+  const newSpecies = document.getElementById('editSpecies').value;
+  const newDate = document.getElementById('editDate').value;
+  const newDevice = document.getElementById('editDevice').value;
+  const newProject = document.getElementById('editProject').value;
+  const newCoords = document.getElementById('editCoords').value;
+  
+  if (!newDate) {
+    showToast('La fecha de captura es obligatoria.', 'error');
+    return;
+  }
+  
+  r.species = newSpecies;
+  r.date = newDate;
+  r.device = newDevice;
+  r.project = newProject;
+  r.coords = newCoords;
+  
+  isEditingMetadata = false;
+  renderMetaList(r);
+  renderDetailActions(r);
+  showToast('Metadatos actualizados correctamente.', 'success');
+}
+
+function cancelEdit(id) {
+  isEditingMetadata = false;
+  const r = recordings.find(x => x.id === id);
+  if (r) {
+    renderMetaList(r);
+    renderDetailActions(r);
+  }
+  showToast('Edición cancelada', 'info');
+}
+
+function toggleDetailPlay() {
+  const btn = document.getElementById('detailPlayBtn');
+  if (testAudio.paused) {
+    testAudio.play().catch(err => {
+      showToast('No se pudo reproducir el audio.', 'error');
+    });
+    btn.textContent = '⏸';
+  } else {
+    testAudio.pause();
+    btn.textContent = '▶';
+  }
+}
+
+function seekDetail(e) {
+  if (!testAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  testAudio.currentTime = pct * testAudio.duration;
+}
+
+function handleDownload() {
+  if (!isLoggedIn) {
+    showToast('Inicia sesión para descargar este archivo en alta calidad', 'info');
+    setTimeout(() => openModal('login'), 800);
+  } else {
+    showToast('Descarga iniciada. El archivo se guardará en tu dispositivo.', 'success');
+  }
+}
+
+function applyFilters() {
+  const region = document.getElementById('filterRegion').value;
+  const species = document.getElementById('filterSpecies').value.toLowerCase();
+  const ecosistemas = Array.from(document.querySelectorAll('.checkbox-group input:checked')).map(cb => cb.value);
+
+  let filtered = recordings.filter(r => {
+    if (region && r.region !== region) return false;
+    if (species && !r.species.toLowerCase().includes(species) && !r.title.toLowerCase().includes(species)) return false;
+    if (ecosistemas.length > 0 && !ecosistemas.includes(r.ecosystem)) return false;
+    return true;
+  });
+
+  renderRecordings(filtered);
+  showToast(filtered.length + ' resultado' + (filtered.length !== 1 ? 's' : '') + ' encontrado' + (filtered.length !== 1 ? 's' : ''), 'info');
+  
+  // Cerrar panel móvil si está abierto
+  const panel = document.getElementById('filtersPanel');
+  if (panel.classList.contains('active')) toggleMobileFilters();
+}
+
+function toggleMobileFilters() {
+  const panel = document.getElementById('filtersPanel');
+  const overlay = document.getElementById('filtersOverlay');
+  panel.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = panel.classList.contains('active') ? 'hidden' : '';
+}
+
+const dropZone = document.getElementById('dropZone');
+if (dropZone) {
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+  dropZone.addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && !e.target.closest('button')) {
+      document.getElementById('fileInput').click();
+    }
+  });
+}
+
+function handleFiles(files) {
+  const list = document.getElementById('fileList');
+  if (!list) return;
+  Array.from(files).forEach((file, idx) => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['wav','flac','mp3'].includes(ext)) {
+      showToast('Ese formato no es compatible. Sube archivos WAV, FLAC o MP3.', 'error');
+      return;
+    }
+    const id = 'file_' + Date.now() + '_' + idx;
+    uploadedFiles.push({id, name: file.name, size: (file.size / 1024 / 1024).toFixed(1)});
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.id = id;
+    item.innerHTML = `
+      <span class="file-item-icon">🎵</span>
+      <span class="file-item-name">${file.name}</span>
+      <span class="file-item-size">${(file.size/1024/1024).toFixed(1)} MB</span>
+      <span class="file-item-status" id="status_${id}">Subiendo...</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress_${id}" style="width:0%"></div></div>
+    `;
+    list.appendChild(item);
+    simulateUpload(id);
+  });
+}
+
+function simulateUpload(id) {
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      const pf = document.getElementById('progress_' + id);
+      const st = document.getElementById('status_' + id);
+      if (pf) pf.style.width = '100%';
+      if (st) { st.textContent = '✓ Completo'; st.style.color = 'var(--secondary)'; }
+    } else {
+      const pf = document.getElementById('progress_' + id);
+      if (pf) pf.style.width = progress + '%';
+    }
+  }, 200);
+}
+
+function selectPerm(el) {
+  document.querySelectorAll('.perm-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+function publishRecording() {
+  const title = document.getElementById('uploadTitle').value.trim();
+  const date = document.getElementById('uploadDate').value;
+
+  document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
+
+  let hasError = false;
+  if (!title) { document.getElementById('fg-title').classList.add('has-error'); hasError = true; }
+  if (!date) { document.getElementById('fg-date').classList.add('has-error'); hasError = true; }
+  if (uploadedFiles.length === 0) { showToast('Selecciona al menos un archivo de audio.', 'error'); return; }
+  if (hasError) { showToast('Faltan campos obligatorios. Revisa el formulario.', 'error'); return; }
+
+  showToast('Grabación publicada correctamente.', 'success');
+  setTimeout(() => { resetUpload(); navigate('explorer'); }, 1500);
+}
+
+function resetUpload() {
+  document.getElementById('uploadTitle').value = '';
+  document.getElementById('uploadSpecies').value = '';
+  document.getElementById('uploadDate').value = '';
+  document.getElementById('uploadCoords').value = '';
+  document.getElementById('uploadDevice').value = '';
+  document.getElementById('uploadProject').value = '';
+  document.getElementById('fileList').innerHTML = '';
+  document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
+  uploadedFiles = [];
+  showToast('Formulario reiniciado', 'info');
+}
+
+function renderPermissions() {
+  const tbody = document.getElementById('permTableBody');
+  if (!tbody) return;
+
+  document.getElementById('statTotal').textContent = permProjects.length;
+  document.getElementById('statPublic').textContent = permProjects.filter(p => p.level === 'public').length;
+  document.getElementById('statRestricted').textContent = permProjects.filter(p => p.level === 'investigador' || p.level === 'registrado').length;
+  document.getElementById('statAdmin').textContent = permProjects.filter(p => p.level === 'admin').length;
+
+  tbody.innerHTML = permProjects.map((p, idx) => `
+    <tr>
+      <td>
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-date">creado el ${p.date}</div>
+      </td>
+      <td>${p.files} archivos</td>
+      <td>
+        <select class="perm-select" id="permSelect${p.id}" onchange="updatePermDesc(${p.id}, this.value)">
+          <option value="public" ${p.level==='public'?'selected':''}>Público</option>
+          <option value="registrado" ${p.level==='registrado'?'selected':''}>Usuarios Registrados</option>
+          <option value="investigador" ${p.level==='investigador'?'selected':''}>Investigadores Registrados</option>
+          <option value="admin" ${p.level==='admin'?'selected':''}>Solo Administrador</option>
+        </select>
+        <div class="perm-desc" id="permDesc${p.id}">${p.desc}</div>
+      </td>
+      <td>
+        <button class="btn btn-ghost" onclick="savePerm(${p.id})">Guardar cambios</button>
+        <div class="perm-saved" id="permSaved${p.id}">✓ Guardado</div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+const permDescriptions = {
+  public: 'Cualquier visitante puede escuchar, pero no descargar.',
+  registrado: 'Usuarios con cuenta pueden escuchar y descargar en MP3.',
+  investigador: 'Los usuarios con cuenta verificada pueden descargar en WAV/FLAC.',
+  admin: 'Solo el administrador puede acceder y gestionar los archivos.'
+};
+
+function updatePermDesc(id, level) {
+  const el = document.getElementById('permDesc' + id);
+  if (el) el.textContent = permDescriptions[level] || '';
+  const saved = document.getElementById('permSaved' + id);
+  if (saved) saved.style.display = 'none';
+}
+
+function savePerm(id) {
+  const proj = permProjects.find(p => p.id === id);
+  const select = document.getElementById('permSelect' + id);
+  const level = select.value;
+  proj.level = level;
+  const label = level === 'public' ? 'todos los visitantes' : level === 'registrado' ? 'usuarios registrados' : level === 'investigador' ? 'investigadores registrados' : 'el administrador';
+  showToast('Listo. Ahora este proyecto está disponible para ' + label + '.', 'success');
+  const saved = document.getElementById('permSaved' + id);
+  if (saved) saved.style.display = 'block';
+}
+
+function renderCollections() {
+  const container = document.getElementById('allCollections');
+  if (!container) return;
+  container.innerHTML = collections.map(c => `
+    <div class="col-card" onclick="navigate('explorer')">
+      <div class="col-card-img" style="background:${c.color}"></div>
+      <div class="col-card-body">
+        <h4>${c.name}</h4>
+        <p>${c.project} · ${c.files} Archivos</p>
+        <span class="ver-mas">Ver más →</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  if (!email) { showToast('Ingresa tu correo electrónico', 'error'); return; }
+  isLoggedIn = true;
+  closeModal('login');
+  updateAuthUI();
+  showToast('Sesión iniciada correctamente. Bienvenido, Admin.', 'success');
+  
+  // Si está en detalle, re-renderizar acciones
+  if (currentDetailId) {
+    const r = recordings.find(x => x.id === currentDetailId);
+    if (r) renderDetailActions(r);
+  }
+}
+
+function logout() {
+  isLoggedIn = false;
+  isEditingMetadata = false;
+  closeUserMenu();
+  updateAuthUI();
+  navigate('home');
+  showToast('Sesión cerrada correctamente', 'info');
+}
+
+function updateAuthUI() {
+  const btnLogin = document.getElementById('btnLogin');
+  const btnRegister = document.getElementById('btnRegister');
+  const userMenu = document.getElementById('userMenu');
+
+  if (isLoggedIn) {
+    btnLogin.style.display = 'none';
+    btnRegister.style.display = 'none';
+    userMenu.style.display = 'block';
+  } else {
+    btnLogin.style.display = 'inline-flex';
+    btnRegister.style.display = 'inline-flex';
+    userMenu.style.display = 'none';
+  }
+}
+
+function toggleUserMenu() {
+  document.getElementById('userDropdown').classList.toggle('active');
+}
+function closeUserMenu() {
+  document.getElementById('userDropdown').classList.remove('active');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) closeUserMenu();
+});
+
+function openModal(name) {
+  document.getElementById(name + 'Modal').classList.add('active');
+}
+function closeModal(name) {
+  document.getElementById(name + 'Modal').classList.remove('active');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+});
+
+function showToast(msg, type) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + (type || 'info');
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  toast.innerHTML = `<span style="font-weight:700;font-size:16px">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; toast.style.transition = '.3s'; setTimeout(() => toast.remove(), 300); }, 3500);
+}
+
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('active');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderRecordings();
+});
+</script>
+</body>
+</html>
+
